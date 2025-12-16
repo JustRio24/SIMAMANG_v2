@@ -5,23 +5,30 @@
 @push('styles')
 <style>
     .chat-container {
-        height: calc(100vh - 250px);
+        height: calc(100vh - 200px);
+        min-height: 400px;
         display: flex;
         flex-direction: column;
+        background: linear-gradient(180deg, #f0f4ff 0%, #f8fafc 100%);
+        border-radius: 0 0 12px 12px;
     }
     
     .chat-messages {
         flex: 1;
         overflow-y: auto;
         padding: 1.5rem;
-        background-color: #f8fafc;
-        border-radius: 12px;
     }
     
     .message {
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
         display: flex;
         align-items: flex-start;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     .message.user {
@@ -29,14 +36,15 @@
     }
     
     .message-avatar {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.2rem;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     .message.bot .message-avatar {
@@ -45,36 +53,90 @@
     }
     
     .message.user .message-avatar {
-        background-color: #e5e7eb;
-        color: #374151;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
     }
     
     .message-content {
-        max-width: 70%;
-        padding: 1rem;
-        border-radius: 12px;
-        margin: 0 1rem;
+        max-width: 75%;
+        padding: 1rem 1.25rem;
+        border-radius: 18px;
+        margin: 0 0.75rem;
+        line-height: 1.5;
     }
     
     .message.bot .message-content {
         background-color: white;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-bottom-left-radius: 4px;
     }
     
     .message.user .message-content {
         background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: white;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .chat-input-container {
+        padding: 1rem 1.5rem;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        border-radius: 0 0 12px 12px;
     }
     
     .chat-input {
-        margin-top: 1rem;
         display: flex;
+        gap: 0.75rem;
+    }
+    
+    .chat-input input {
+        border-radius: 24px;
+        padding: 0.75rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s;
+    }
+    
+    .chat-input input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .chat-input button {
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quick-actions {
+        display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .quick-action {
+        border-radius: 20px;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.9rem;
+        transition: all 0.2s;
+        border: 2px solid #e5e7eb;
+        background: white;
+    }
+    
+    .quick-action:hover {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
     }
     
     .typing-indicator {
         display: none;
-        padding: 1rem;
+        padding: 0.5rem 0;
     }
     
     .typing-indicator.active {
@@ -82,30 +144,71 @@
         align-items: center;
     }
     
-    .typing-indicator span {
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+        padding: 0.75rem 1rem;
+        background: white;
+        border-radius: 18px;
+        margin-left: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .typing-dots span {
         height: 8px;
         width: 8px;
-        background-color: #9ca3af;
+        background: linear-gradient(135deg, #1e40af, #7c3aed);
         border-radius: 50%;
-        display: inline-block;
-        margin-right: 5px;
         animation: bounce 1.4s infinite ease-in-out both;
     }
     
-    .typing-indicator span:nth-child(1) {
-        animation-delay: -0.32s;
-    }
-    
-    .typing-indicator span:nth-child(2) {
-        animation-delay: -0.16s;
-    }
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
     
     @keyframes bounce {
-        0%, 80%, 100% {
-            transform: scale(0);
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .status-online {
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+        animation: blink 2s infinite;
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    @media (max-width: 768px) {
+        .chat-container {
+            height: calc(100vh - 180px);
         }
-        40% {
-            transform: scale(1);
+        
+        .message-content {
+            max-width: 85%;
+            padding: 0.875rem 1rem;
+        }
+        
+        .chat-messages {
+            padding: 1rem;
+        }
+        
+        .quick-action {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.75rem;
         }
     }
 </style>
@@ -113,102 +216,97 @@
 
 @section('content')
 <div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header" style="background: linear-gradient(135deg, #1e40af, #7c3aed); color: white;">
+    <div class="col-lg-10 col-xl-8 mx-auto">
+        <div class="card mb-0" style="overflow: hidden;">
+            <div class="chat-header">
                 <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="bi bi-robot" style="font-size: 2rem;"></i>
+                    <div class="me-3" style="font-size: 2.5rem;">
+                        <i class="bi bi-robot"></i>
                     </div>
                     <div>
-                        <h5 class="mb-0">MAMANG</h5>
-                        <small>Asisten Virtual SIMAMANG - Rule-Based Chatbot</small>
+                        <h4 class="mb-0 fw-bold">MAMANG AI</h4>
+                        <small><span class="status-online"></span>Asisten Virtual Cerdas SIMAMANG</small>
                     </div>
                 </div>
             </div>
             
-            <div class="card-body p-0">
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <!-- Welcome Message -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-avatar">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p class="mb-2"><strong>Halo! Saya MAMANG</strong> 👋</p>
+                            <p class="mb-2">Asisten virtual cerdas untuk membantu Anda dengan proses magang di POLSRI. Saya dapat membantu:</p>
+                            <ul class="mb-2 ps-3">
+                                <li>Mengecek status pengajuan magang</li>
+                                <li>Memberikan panduan langkah-langkah pengajuan</li>
+                                <li>Informasi dokumen dan persyaratan</li>
+                                <li>Estimasi waktu proses</li>
+                                <li>Menjawab pertanyaan seputar magang</li>
+                            </ul>
+                            <p class="mb-0 small" style="opacity: 0.8;">
+                                <i class="bi bi-lightbulb"></i> Coba tanyakan sesuatu atau gunakan tombol cepat di bawah!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    @foreach($messages as $msg)
+                        <div class="message user">
+                            <div class="message-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="message-content">
+                                {{ $msg->message }}
+                            </div>
+                        </div>
+                        
                         <div class="message bot">
                             <div class="message-avatar">
                                 <i class="bi bi-robot"></i>
                             </div>
                             <div class="message-content">
-                                <p class="mb-2"><strong>Halo! Saya MAMANG 👋</strong></p>
-                                <p class="mb-0">Asisten virtual untuk membantu Anda dengan proses magang. Saya dapat membantu:</p>
-                                <ul class="mb-0 mt-2">
-                                    <li>Cek status pengajuan magang</li>
-                                    <li>Panduan cara mengajukan magang</li>
-                                    <li>Informasi dokumen yang diperlukan</li>
-                                    <li>Estimasi waktu proses</li>
-                                </ul>
-                                <p class="mt-2 mb-0 small text-muted">
-                                    <i class="bi bi-info-circle"></i> Silakan ketik pertanyaan Anda!
-                                </p>
+                                {!! nl2br(e($msg->response)) !!}
                             </div>
                         </div>
-                        
-                        <!-- Previous Messages -->
-                        @foreach($messages as $msg)
-                            <div class="message user">
-                                <div class="message-avatar">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                                <div class="message-content">
-                                    {{ $msg->message }}
-                                </div>
-                            </div>
-                            
-                            <div class="message bot">
-                                <div class="message-avatar">
-                                    <i class="bi bi-robot"></i>
-                                </div>
-                                <div class="message-content">
-                                    {!! nl2br(e($msg->response)) !!}
-                                </div>
-                            </div>
-                        @endforeach
-                        
-                        <!-- Typing Indicator -->
-                        <div class="typing-indicator" id="typingIndicator">
-                            <div class="message-avatar" style="background: linear-gradient(135deg, #1e40af, #7c3aed); color: white;">
-                                <i class="bi bi-robot"></i>
-                            </div>
-                            <div class="ms-3">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
+                    @endforeach
+                    
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #1e40af, #7c3aed); color: white; width: 42px; height: 42px;">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
                         </div>
                     </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <form id="chatForm" class="chat-input">
+                        @csrf
+                        <input type="text" id="messageInput" class="form-control" 
+                               placeholder="Ketik pertanyaan Anda di sini..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </form>
                     
-                    <div class="p-3 border-top">
-                        <form id="chatForm" class="chat-input">
-                            @csrf
-                            <input type="text" id="messageInput" class="form-control" 
-                                   placeholder="Ketik pertanyaan Anda..." autocomplete="off" required>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send"></i>
-                            </button>
-                        </form>
-                        
-                        <!-- Quick Actions -->
-                        <div class="mt-2 d-flex flex-wrap gap-2">
-                            <button class="btn btn-sm btn-outline-secondary quick-action" data-message="status">
-                                Status magang saya
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary quick-action" data-message="cara">
-                                Cara mengajukan
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary quick-action" data-message="dokumen">
-                                Dokumen yang diperlukan
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary quick-action" data-message="timeline">
-                                Berapa lama prosesnya?
-                            </button>
-                        </div>
+                    <div class="quick-actions">
+                        <button class="btn quick-action" data-message="Cek status pengajuan saya">
+                            <i class="bi bi-search"></i> Status Saya
+                        </button>
+                        <button class="btn quick-action" data-message="Bagaimana cara mengajukan magang?">
+                            <i class="bi bi-question-circle"></i> Cara Mengajukan
+                        </button>
+                        <button class="btn quick-action" data-message="Apa saja dokumen yang diperlukan?">
+                            <i class="bi bi-file-earmark"></i> Dokumen
+                        </button>
+                        <button class="btn quick-action" data-message="Berapa lama proses pengajuan magang?">
+                            <i class="bi bi-clock"></i> Timeline
+                        </button>
                     </div>
                 </div>
             </div>
@@ -225,7 +323,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chatMessages');
     const typingIndicator = document.getElementById('typingIndicator');
     
-    // Quick actions
     document.querySelectorAll('.quick-action').forEach(btn => {
         btn.addEventListener('click', function() {
             messageInput.value = this.dataset.message;
@@ -233,18 +330,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Send message
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const message = messageInput.value.trim();
         if (!message) return;
         
-        // Add user message
         addMessage(message, 'user');
         messageInput.value = '';
         
-        // Show typing indicator
         typingIndicator.classList.add('active');
         scrollToBottom();
         
@@ -260,7 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             
-            // Hide typing indicator
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+            
             typingIndicator.classList.remove('active');
             
             if (data.success) {
@@ -278,12 +373,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
         
+        const formattedText = text
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
         messageDiv.innerHTML = `
             <div class="message-avatar">
                 <i class="bi bi-${sender === 'bot' ? 'robot' : 'person'}"></i>
             </div>
             <div class="message-content">
-                ${text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                ${formattedText}
             </div>
         `;
         
@@ -295,7 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    // Initial scroll
     scrollToBottom();
 });
 </script>

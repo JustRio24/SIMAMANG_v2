@@ -164,9 +164,9 @@ class ApprovalController extends Controller
             'timestamp' => $approval->approved_at->toIso8601String(),
         ]);
 
-        $qrCode = QrCode::format('png')->size(200)->generate($qrData);
+        $qrCode = QrCode::format('svg')->size(200)->generate($qrData);
         
-        $qrPath = "signatures/qr_{$approval->id}.png";
+        $qrPath = "signatures/qr_{$approval->id}.svg";
         Storage::disk('public')->put($qrPath, $qrCode);
 
         $approval->update([

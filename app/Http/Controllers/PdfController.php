@@ -22,7 +22,8 @@ class PdfController extends Controller
         $pdf = Pdf::loadView('pdf.letter', $data)
             ->setPaper('a4', 'portrait');
 
-        return $pdf->stream("Surat_Pengantar_{$internship->letter_number}.pdf");
+        $safeFilename = str_replace(['/', '\\'], '-', $internship->letter_number);
+        return $pdf->stream("Surat_Pengantar_{$safeFilename}.pdf");
     }
 
     public function downloadLetter(InternshipApplication $internship)
@@ -39,6 +40,7 @@ class PdfController extends Controller
         $pdf = Pdf::loadView('pdf.letter', $data)
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download("Surat_Pengantar_{$internship->letter_number}.pdf");
+        $safeFilename = str_replace(['/', '\\'], '-', $internship->letter_number);
+        return $pdf->download("Surat_Pengantar_{$safeFilename}.pdf");
     }
 }

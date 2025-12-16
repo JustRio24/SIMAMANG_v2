@@ -21,52 +21,39 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8fafc;
+            padding-top: 70px;
         }
         
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            transition: all 0.3s;
+        .navbar-main {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .sidebar-brand {
-            padding: 1.5rem;
-            font-size: 1.5rem;
+        .navbar-brand {
             font-weight: bold;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 1.4rem;
         }
         
-        .sidebar-nav {
-            padding: 1rem 0;
-        }
-        
-        .nav-item {
-            padding: 0.75rem 1.5rem;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
             transition: all 0.3s;
+            margin: 0 0.15rem;
         }
         
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255,255,255,0.15);
         }
         
-        .nav-item i {
-            margin-right: 0.75rem;
-            font-size: 1.2rem;
+        .nav-link i {
+            margin-right: 0.4rem;
         }
         
         .main-content {
-            margin-left: 250px;
-            padding: 2rem;
+            padding: 1.5rem;
+            min-height: calc(100vh - 70px);
         }
         
         .card {
@@ -74,6 +61,12 @@
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .card-header {
@@ -141,88 +134,206 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: all 0.3s;
             z-index: 1000;
+            animation: pulse 2s infinite;
         }
         
         .chatbot-float:hover {
             transform: scale(1.1);
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(30, 64, 175, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0); }
+        }
+        
+        .user-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+        
+        @media (max-width: 991.98px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .navbar-collapse {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                padding: 1rem;
+                border-radius: 0 0 12px 12px;
+                margin-top: 0.5rem;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                margin: 0.25rem 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            body {
+                padding-top: 60px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .chatbot-float {
+                width: 50px;
+                height: 50px;
+                bottom: 1rem;
+                right: 1rem;
+                font-size: 1.25rem;
+            }
         }
     </style>
     
     @stack('styles')
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <i class="bi bi-briefcase"></i> SIMAMANG
-        </div>
-        
-        <nav class="sidebar-nav">
-            <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Dashboard
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-main fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ route('dashboard') }}">
+                <i class="bi bi-briefcase-fill"></i> SIMAMANG
             </a>
             
-            @if(auth()->user()->isMahasiswa())
-                <a href="{{ route('internships.index') }}" class="nav-item {{ request()->routeIs('internships.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i> Pengajuan Saya
-                </a>
-                <a href="{{ route('internships.create') }}" class="nav-item">
-                    <i class="bi bi-plus-circle"></i> Ajukan Magang
-                </a>
-            @else
-                <a href="{{ route('internships.index') }}" class="nav-item {{ request()->routeIs('internships.*') ? 'active' : '' }}">
-                    <i class="bi bi-folder"></i> Daftar Pengajuan
-                </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    @if(auth()->user()->isMahasiswa())
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('internships.index') ? 'active' : '' }}" href="{{ route('internships.index') }}">
+                                <i class="bi bi-file-earmark-text"></i> Pengajuan Saya
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('internships.create') ? 'active' : '' }}" href="{{ route('internships.create') }}">
+                                <i class="bi bi-plus-circle"></i> Ajukan Magang
+                            </a>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('internships.*') ? 'active' : '' }}" href="{{ route('internships.index') }}">
+                                <i class="bi bi-folder"></i> Daftar Pengajuan
+                            </a>
+                        </li>
+                    @endif
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('chatbot.*') ? 'active' : '' }}" href="{{ route('chatbot.index') }}">
+                            <i class="bi bi-chat-dots"></i> MAMANG Chat
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown user-dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <div class="user-avatar me-2">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                            <span class="d-none d-md-inline">{{ auth()->user()->name }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    <small class="text-muted">Role:</small><br>
+                                    <strong>{{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}</strong>
+                                </span>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="container-fluid">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             @endif
             
-            <a href="{{ route('chatbot.index') }}" class="nav-item {{ request()->routeIs('chatbot.*') ? 'active' : '' }}">
-                <i class="bi bi-chat-dots"></i> MAMANG Chat
-            </a>
-            
-            <div style="margin-top: auto; padding-top: 2rem;">
-                <div class="nav-item" style="flex-direction: column; align-items: flex-start;">
-                    <small style="opacity: 0.6;">Logged in as</small>
-                    <strong>{{ auth()->user()->name }}</strong>
-                    <small class="badge bg-light text-dark mt-1">{{ strtoupper(auth()->user()->role) }}</small>
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; width: 100%; text-align: left;">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
-                </form>
-            </div>
-        </nav>
+            @endif
+            
+            @if(session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>{{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            
+            @yield('content')
+        </div>
     </div>
     
-    <!-- Main Content -->
-    <div class="main-content">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        
-        @if(session('warning'))
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-circle me-2"></i>{{ session('warning') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        
-        @yield('content')
-    </div>
-    
-    <!-- Chatbot Float Button -->
     <a href="{{ route('chatbot.index') }}" class="chatbot-float" title="Chat dengan MAMANG">
         <i class="bi bi-robot"></i>
     </a>

@@ -161,8 +161,20 @@
         
         @if($wadir1Approval && $wadir1Approval->qr_code_path)
             <div class="qr-code">
-                <img src="{{ storage_path('app/public/' . $wadir1Approval->qr_code_path) }}" 
-                     alt="QR Code" style="width: 100px; height: 100px;">
+                @php
+                    $qrPath = storage_path('app/public/' . $wadir1Approval->qr_code_path);
+                    $qrContent = '';
+                    if (file_exists($qrPath)) {
+                        $qrContent = file_get_contents($qrPath);
+                        $qrContent = preg_replace('/<\?xml[^>]*\?>/', '', $qrContent);
+                        $qrContent = str_replace(['width="200"', 'height="200"'], ['width="100"', 'height="100"'], $qrContent);
+                    }
+                @endphp
+                @if($qrContent)
+                    <div style="display: inline-block; border: 1px solid #ccc; padding: 5px; background: white;">
+                        {!! $qrContent !!}
+                    </div>
+                @endif
                 <p style="font-size: 8pt; margin: 5px 0;">
                     Disetujui secara elektronik pada:<br>
                     {{ $wadir1Approval->approved_at->format('d/m/Y H:i:s') }}
@@ -185,4 +197,4 @@
         <p>Verifikasi dokumen dapat dilakukan dengan memindai QR Code di atas</p>
     </div>
 </body>
-</html>
+</html> 

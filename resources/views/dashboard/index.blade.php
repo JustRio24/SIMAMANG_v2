@@ -3,10 +3,23 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="row mb-4">
-    <div class="col-12">
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
         <h1 class="h3 mb-0">Dashboard</h1>
-        <p class="text-muted">Selamat datang, {{ $user->name }}</p>
+        <p class="text-muted mb-0">Selamat datang, {{ $user->name }}</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="d-inline-block mb-0" style="background: transparant; color: black;">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex align-items-center">
+                    
+                    <div>
+                        <small class="d-block" style="opacity: 0.8;">Waktu Indonesia Barat (WIB)</small>
+                        <strong id="palembangClock" style="font-size: 1.25rem;">--:--:--</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -17,7 +30,7 @@
             <div class="col-md-8">
                 <h5 class="mb-1"><i class="bi bi-geo-alt"></i> {{ $weather['city'] }}</h5>
                 <h2 class="mb-0">{{ $weather['temp'] }}°C</h2>
-                <p class="mb-0">{{ $weather['condition'] }} • Kelembaban: {{ $weather['humidity'] }}%</p>
+                <p class="mb-0">{{ $weather['condition'] }} | Kelembaban: {{ $weather['humidity'] }}%</p>
             </div>
             <div class="col-md-4 text-md-end">
                 <i class="bi bi-sun" style="font-size: 4rem; opacity: 0.8;"></i>
@@ -27,18 +40,17 @@
 </div>
 @endif
 
-<!-- Statistics Cards -->
 <div class="row mb-4">
     @foreach($stats as $key => $value)
-    <div class="col-md-3 mb-3">
-        <div class="card">
+    <div class="col-6 col-lg-3 mb-3">
+        <div class="card h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <p class="text-muted mb-1 text-uppercase small">{{ str_replace('_', ' ', $key) }}</p>
                         <h3 class="mb-0">{{ $value }}</h3>
                     </div>
-                    <div class="text-primary" style="font-size: 2.5rem; opacity: 0.2;">
+                    <div class="text-primary" style="font-size: 2rem; opacity: 0.3;">
                         <i class="bi bi-{{ $key == 'total' ? 'folder' : ($key == 'pending' ? 'clock' : ($key == 'approved' ? 'check-circle' : 'flag')) }}"></i>
                     </div>
                 </div>
@@ -48,14 +60,13 @@
     @endforeach
 </div>
 
-<!-- Recent Applications -->
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
         <h5 class="mb-0">
             @if($user->isMahasiswa())
-                Pengajuan Magang Terbaru
+                <i class="bi bi-file-earmark-text me-2"></i>Pengajuan Magang Terbaru
             @else
-                Pengajuan Perlu Perhatian
+                <i class="bi bi-exclamation-circle me-2"></i>Pengajuan Perlu Perhatian
             @endif
         </h5>
         <a href="{{ route('internships.index') }}" class="btn btn-sm btn-outline-primary">
@@ -67,18 +78,23 @@
             <div class="text-center py-5 text-muted">
                 <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
                 <p class="mt-3">Belum ada pengajuan</p>
+                @if($user->isMahasiswa())
+                    <a href="{{ route('internships.create') }}" class="btn btn-primary mt-2">
+                        <i class="bi bi-plus-circle"></i> Buat Pengajuan Baru
+                    </a>
+                @endif
             </div>
         @else
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th>No. Pengajuan</th>
+                            <th>No</th>
                             @if(!$user->isMahasiswa())
                                 <th>Mahasiswa</th>
                             @endif
                             <th>Perusahaan</th>
-                            <th>Periode</th>
+                            <th class="d-none d-md-table-cell">Periode</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -94,7 +110,9 @@
                                 </td>
                             @endif
                             <td>{{ $app->company_name }}</td>
-                            <td>{{ $app->start_date->format('d/m/Y') }} - {{ $app->end_date->format('d/m/Y') }}</td>
+                            <td class="d-none d-md-table-cell">
+                                <small>{{ $app->start_date->format('d/m/Y') }} - {{ $app->end_date->format('d/m/Y') }}</small>
+                            </td>
                             <td>
                                 <span class="badge bg-{{ $app->status_color }}">
                                     {{ $app->status_label }}
@@ -102,7 +120,7 @@
                             </td>
                             <td>
                                 <a href="{{ route('internships.show', $app) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> Detail
+                                    <i class="bi bi-eye"></i><span class="d-none d-sm-inline"> Detail</span>
                                 </a>
                             </td>
                         </tr>
@@ -114,14 +132,13 @@
     </div>
 </div>
 
-<!-- Recent Activity -->
 <div class="card mt-4">
     <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Aktivitas Terbaru</h5>
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Aktivitas Terbaru</h5>
     </div>
     <div class="card-body">
         @if($recent_activities->isEmpty())
-            <p class="text-muted text-center py-3">Belum ada aktivitas</p>
+            <p class="text-muted text-center py-3 mb-0">Belum ada aktivitas</p>
         @else
             <div class="timeline">
                 @foreach($recent_activities as $activity)
@@ -140,3 +157,23 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function updatePalembangClock() {
+    const options = {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    };
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('id-ID', options);
+    document.getElementById('palembangClock').textContent = timeString;
+}
+
+updatePalembangClock();
+setInterval(updatePalembangClock, 1000);
+</script>
+@endpush
