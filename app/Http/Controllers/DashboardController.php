@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/DashboardController.php
 namespace App\Http\Controllers;
 
 use App\Models\InternshipApplication;
@@ -46,13 +46,13 @@ class DashboardController extends Controller
                 ];
                 break;
 
-            case 'sekjur':
+            case 'kaprodi':
             case 'kajur':
             case 'kpa':
             case 'wadir1':
                 $statusMap = [
-                    'sekjur' => 'diverifikasi_jurusan',
-                    'kajur' => 'disetujui_sekjur',
+                    'kaprodi' => 'diverifikasi_jurusan',
+                    'kajur' => 'disetujui_kaprodi',
                     'kpa' => 'disetujui_akademik',
                     'wadir1' => 'diproses_kpa',
                 ];
@@ -88,24 +88,12 @@ class DashboardController extends Controller
     private function getWeather()
     {
         try {
-            // Using free OpenWeatherMap API (requires API key)
-            // For demo purposes, return static data
             return [
                 'temp' => 28,
                 'condition' => 'Cerah',
                 'humidity' => 75,
                 'city' => 'Palembang',
             ];
-            
-            // Real implementation:
-            // $apiKey = env('OPENWEATHER_API_KEY');
-            // $response = Http::get("https://api.openweathermap.org/data/2.5/weather", [
-            //     'q' => 'Palembang,ID',
-            //     'appid' => $apiKey,
-            //     'units' => 'metric',
-            //     'lang' => 'id'
-            // ]);
-            // return $response->json();
         } catch (\Exception $e) {
             return null;
         }

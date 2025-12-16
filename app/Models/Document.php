@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/Document.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

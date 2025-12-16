@@ -197,8 +197,8 @@
                 @elseif(auth()->user()->isPejabat())
                     @php
                         $canApprove = [
-                            'sekjur' => 'diverifikasi_jurusan',
-                            'kajur' => 'disetujui_sekjur',
+                            'kaprodi' => 'diverifikasi_jurusan',
+                            'kajur' => 'disetujui_kaprodi',
                             'kpa' => 'disetujui_akademik',
                             'wadir1' => 'diproses_kpa',
                         ];

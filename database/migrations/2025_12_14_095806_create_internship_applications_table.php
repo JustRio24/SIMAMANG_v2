@@ -26,7 +26,7 @@ return new class extends Migration
                 'diajukan',
                 'revisi',
                 'diverifikasi_jurusan',
-                'disetujui_sekjur',
+                'disetujui_kaprodi',
                 'disetujui_akademik',
                 'diproses_kpa',
                 'disetujui_wadir1',

@@ -7,8 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #00A19C;
+            --secondary-color: #00D4CE;
+        }
         body {
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,13 +27,29 @@
             max-width: 550px;
             width: 100%;
         }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            margin-bottom: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #008B87, var(--primary-color));
+        }
     </style>
 </head>
 <body>
     <div class="register-card">
-        <div class="text-center mb-4">
-            <i class="bi bi-briefcase" style="font-size: 3rem; color: #1e40af;"></i>
-            <h2 class="fw-bold">Daftar SIMAMANG</h2>
+        <div class="logo-container">
+            <img src="{{ asset('storage/images/logo.png') }}" alt="SIMAMANG Logo">
+            <h2 class="fw-bold" style="color: var(--primary-color);">Daftar SIMAMANG</h2>
             <p class="text-muted">Sistem Manajemen Magang POLSRI</p>
         </div>
         
@@ -104,7 +124,7 @@
             </button>
             
             <div class="text-center">
-                <p class="mb-0">Sudah punya akun? <a href="{{ route('login') }}">Login di sini</a></p>
+                <p class="mb-0">Sudah punya akun? <a href="{{ route('login') }}" style="color: var(--primary-color);">Login di sini</a></p>
             </div>
         </form>
     </div>

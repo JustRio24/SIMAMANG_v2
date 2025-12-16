@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/ChatbotController.php
 namespace App\Http\Controllers;
 
 use App\Models\ChatMessage;
@@ -113,8 +113,8 @@ class ChatbotController extends Controller
         $statusInfo = [
             'diajukan' => 'Pengajuan Anda sedang menunggu verifikasi dari Admin Jurusan.',
             'revisi' => 'Pengajuan Anda memerlukan revisi. Silakan periksa catatan revisi dan perbarui dokumen Anda.',
-            'diverifikasi_jurusan' => 'Pengajuan Anda telah diverifikasi jurusan dan menunggu persetujuan Sekretaris Jurusan.',
-            'disetujui_sekjur' => 'Pengajuan Anda telah disetujui Sekjur dan menunggu persetujuan Ketua Jurusan/Kaprodi.',
+            'diverifikasi_jurusan' => 'Pengajuan Anda telah diverifikasi jurusan dan menunggu persetujuan Ketua Program Studi.',
+            'disetujui_kaprodi' => 'Pengajuan Anda telah disetujui Kaprodi dan menunggu persetujuan Ketua Jurusan.',
             'disetujui_akademik' => 'Pengajuan Anda telah disetujui akademik dan sedang diproses oleh KPA untuk pembuatan surat pengantar.',
             'diproses_kpa' => 'Surat pengantar Anda sedang diproses KPA dan akan diteruskan ke Wakil Direktur 1.',
             'disetujui_wadir1' => 'Surat pengantar Anda telah disetujui Wadir 1 dan akan segera terbit.',
@@ -149,8 +149,8 @@ Pastikan semua data yang Anda input sudah benar ya!";
 
 1. Mahasiswa mengajukan
 2. Admin Jurusan memverifikasi
-3. Sekjur memberikan persetujuan
-4. Kajur/Kaprodi menyetujui
+3. Kaprodi memberikan persetujuan
+4. Kajur menyetujui
 5. KPA generate surat pengantar
 6. Wadir 1 approval final
 7. Surat terbit & siap digunakan
@@ -183,8 +183,8 @@ Seluruh proses dapat di-track secara real-time melalui dashboard Anda.";
         return "**Estimasi Waktu Proses:**
 
 - Verifikasi Admin Jurusan: 1-2 hari kerja
-- Persetujuan Sekjur: 1-2 hari kerja
-- Persetujuan Kajur/Kaprodi: 2-3 hari kerja
+- Persetujuan Kaprodi: 1-2 hari kerja
+- Persetujuan Kajur: 2-3 hari kerja
 - Proses KPA: 1-2 hari kerja
 - Approval Wadir 1: 1-2 hari kerja
 

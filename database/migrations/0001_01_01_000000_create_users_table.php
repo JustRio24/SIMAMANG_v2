@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('nim')->nullable()->unique();
-            $table->enum('role', ['mahasiswa', 'admin_jurusan', 'sekjur', 'kajur', 'kpa', 'wadir1'])->default('mahasiswa');
+            $table->enum('role', ['mahasiswa', 'admin_jurusan', 'kaprodi', 'kajur', 'kpa', 'wadir1'])->default('mahasiswa');
             $table->string('jurusan')->nullable();
             $table->string('prodi')->nullable();
             $table->string('phone')->nullable();

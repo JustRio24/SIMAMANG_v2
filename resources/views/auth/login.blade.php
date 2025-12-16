@@ -6,10 +6,13 @@
     <title>Login - SIMAMANG</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
     <style>
+        :root {
+            --primary-color: #00A19C;
+            --secondary-color: #00D4CE;
+        }
         body {
-            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,99 +26,127 @@
             max-width: 450px;
             width: 100%;
         }
-        .logo {
-            font-size: 3rem;
-            color: #1e40af;
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo-container img {
+            height: 80px;
+            width: auto;
             margin-bottom: 1rem;
         }
-        .shortcut-btn {
-            font-size: 0.85rem;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
         }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #008B87, var(--primary-color));
+            transform: translateY(-2px);
+        }
+
+        .quick-login-card {
+            background: white;
+            border-radius: 10px;
+            padding: 0.6rem;
+            width: 140px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        }
+
+        .quick-login-card button {
+            font-size: 0.72rem;
+            padding: 4px 6px;
+            line-height: 1.2;
+        }
+
+
     </style>
 </head>
 <body>
-
-<div class="login-card">
-    <div class="text-center mb-4">
-        <i class="bi bi-briefcase logo"></i>
-        <h2 class="fw-bold">SIMAMANG</h2>
-        <p class="text-muted">Sistem Manajemen Magang POLSRI</p>
+    <div class="d-flex align-items-center justify-content-center gap-3">
+        
+    <div class="login-card">
+        <div class="logo-container">
+            <img style="transform: scale(3.5); transform-origin: center; margin-bottom: -20px;" src="{{ asset('storage/images/logo.png') }}" alt="SIMAMANG Logo">
+        </div>
+        
+        @if($errors->any())
+            <div class="alert alert-danger">
+                {{ $errors->first() }}
+            </div>
+        @endif
+        
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+            
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autofocus>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="remember" class="form-check-input" id="remember">
+                <label class="form-check-label" for="remember">Remember Me</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </button>
+            
+            <div class="text-center">
+                <p class="mb-0">Belum punya akun? <a href="{{ route('register') }}" style="color: var(--primary-color);">Daftar di sini</a></p>
+            </div>
+        </form>
     </div>
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            {{ $errors->first() }}
-        </div>
-    @endif
+    <!-- QUICK LOGIN CARD -->
+    <div class="quick-login-card">
+        <h6 class="fw-bold mb-2 text-center">Quick Login</h6>
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
-
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" id="email" name="email" class="form-control"
-                   value="{{ old('email') }}" required autofocus>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" id="password" name="password"
-                   class="form-control" required>
-        </div>
-
-        <div class="mb-3 form-check">
-            <input type="checkbox" name="remember" class="form-check-input" id="remember">
-            <label class="form-check-label" for="remember">Remember Me</label>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+        <button class="btn btn-sm btn-outline-primary w-100 mb-1"
+            onclick="fillLogin('admin.ts@polsri.ac.id')">
+            Admin Jurusan
         </button>
-    </form>
 
-    <!-- ================= SHORTCUT LOGIN ================= -->
-    <hr>
+        <button class="btn btn-sm btn-outline-primary w-100 mb-1"
+            onclick="fillLogin('kaprodi@polsri.ac.id')">
+            Ketua Prodi
+        </button>
 
-    <div class="mb-3">
-        <p class="fw-semibold mb-2 text-center">⚡ Login Cepat (Demo)</p>
+        <button class="btn btn-sm btn-outline-primary w-100 mb-1"
+            onclick="fillLogin('kajur@polsri.ac.id')">
+            Ketua Jurusan
+        </button>
 
-        <div class="d-grid gap-2">
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('admin.ts@polsri.ac.id')">Admin Jurusan</button>
+        <button class="btn btn-sm btn-outline-primary w-100 mb-1"
+            onclick="fillLogin('kpa@polsri.ac.id')">
+            KPA
+        </button>
 
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('sekjur@polsri.ac.id')">Sekretaris Jurusan</button>
+        <button class="btn btn-sm btn-outline-primary w-100 mb-1"
+            onclick="fillLogin('wadir1@polsri.ac.id')">
+            Wadir 1
+        </button>
 
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('kajur@polsri.ac.id')">Ketua Jurusan</button>
+        <hr class="my-2">
 
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('kpa@polsri.ac.id')">KPA</button>
-
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('wadir1@polsri.ac.id')">Wakil Direktur 1</button>
-
-            <button class="btn btn-outline-secondary shortcut-btn"
-                onclick="fillLogin('mahasiswa1@mhs.polsri.ac.id')">Mahasiswa</button>
-        </div>
-
-        <small class="text-muted d-block mt-2 text-center">
-            Password default: <strong>password123</strong>
-        </small>
+        <button class="btn btn-sm btn-outline-success w-100"
+            onclick="fillLogin('mahasiswa1@mhs.polsri.ac.id')">
+            Mahasiswa
+        </button>
     </div>
-    <!-- ================================================== -->
 
-    <div class="text-center mt-3">
-        <p class="mb-0">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></p>
     </div>
-</div>
 
-<script>
-    function fillLogin(email) {
-        document.getElementById('email').value = email;
-        document.getElementById('password').value = 'password123';
-    }
-</script>
-
+    <script>
+        function fillLogin(email) {
+            document.querySelector('input[name="email"]').value = email;
+            document.querySelector('input[name="password"]').value = 'password123';
+        }
+    </script>
 </body>
 </html>

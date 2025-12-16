@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/User.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,6 +46,6 @@ class User extends Authenticatable
 
     public function isPejabat()
     {
-        return in_array($this->role, ['sekjur', 'kajur', 'kpa', 'wadir1']);
+        return in_array($this->role, ['kaprodi', 'kajur', 'kpa', 'wadir1']);
     }
 }

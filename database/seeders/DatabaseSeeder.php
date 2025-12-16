@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Dr. Ahmad Sekretaris Jurusan',
-            'email' => 'sekjur@polsri.ac.id',
-            'role' => 'sekjur',
+            'name' => 'Dr. Ahmad Ketua Program Studi',
+            'email' => 'kaprodi@polsri.ac.id',
+            'role' => 'kaprodi',
             'jurusan' => 'Teknik Sipil',
             'password' => Hash::make('password123'),
         ]);
@@ -126,7 +126,7 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
         $this->command->info('=== LOGIN CREDENTIALS ===');
         $this->command->info('Admin Jurusan: admin.ts@polsri.ac.id / password123');
-        $this->command->info('Sekretaris Jurusan: sekjur@polsri.ac.id / password123');
+        $this->command->info('Ketua Prodi: kaprodi@polsri.ac.id / password123');
         $this->command->info('Ketua Jurusan: kajur@polsri.ac.id / password123');
         $this->command->info('KPA: kpa@polsri.ac.id / password123');
         $this->command->info('Wakil Direktur 1: wadir1@polsri.ac.id / password123');

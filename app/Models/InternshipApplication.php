@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/InternshipApplication.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -51,7 +51,7 @@ class InternshipApplication extends Model
             'diajukan' => 'Diajukan',
             'revisi' => 'Perlu Revisi',
             'diverifikasi_jurusan' => 'Diverifikasi Jurusan',
-            'disetujui_sekjur' => 'Disetujui Sekretaris Jurusan',
+            'disetujui_kaprodi' => 'Disetujui Ketua Program Studi',
             'disetujui_akademik' => 'Disetujui Akademik',
             'diproses_kpa' => 'Diproses KPA',
             'disetujui_wadir1' => 'Disetujui Wakil Direktur 1',

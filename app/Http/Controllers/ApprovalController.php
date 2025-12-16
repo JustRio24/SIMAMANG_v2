@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/ApprovalController.php
 namespace App\Http\Controllers;
 
 use App\Models\InternshipApplication;
@@ -7,7 +7,6 @@ use App\Models\Approval;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
 
 class ApprovalController extends Controller
@@ -61,8 +60,8 @@ class ApprovalController extends Controller
 
         // Check if status matches role
         $statusMap = [
-            'sekjur' => 'diverifikasi_jurusan',
-            'kajur' => 'disetujui_sekjur',
+            'kaprodi' => 'diverifikasi_jurusan',
+            'kajur' => 'disetujui_kaprodi',
             'kpa' => 'disetujui_akademik',
             'wadir1' => 'diproses_kpa',
         ];
@@ -86,7 +85,7 @@ class ApprovalController extends Controller
 
         // Approve and move to next status
         $nextStatus = [
-            'sekjur' => 'disetujui_sekjur',
+            'kaprodi' => 'disetujui_kaprodi',
             'kajur' => 'disetujui_akademik',
             'kpa' => 'diproses_kpa',
             'wadir1' => 'disetujui_wadir1',
@@ -94,9 +93,9 @@ class ApprovalController extends Controller
 
         $internship->update(['status' => $nextStatus[$user->role]]);
         
-        // Generate signature and QR code
+        // Create approval and generate signature
         $approval = $this->createApproval($internship, $user->role, 'approve', $request->note);
-        $this->generateSignature($approval);
+        $this->generateSignature($approval, $internship);
         
         $this->logActivity('approve_application', "Menyetujui pengajuan magang sebagai {$user->role}", $internship->id);
 
@@ -132,7 +131,9 @@ class ApprovalController extends Controller
         $internship->update(['status' => 'diproses_kpa']);
 
         // Create approval record
-        $this->createApproval($internship, 'kpa', 'approve', 'Surat pengantar resmi telah digenerate');
+        $approval = $this->createApproval($internship, 'kpa', 'approve', 'Surat pengantar resmi telah digenerate');
+        $this->generateSignature($approval, $internship);
+        
         $this->logActivity('generate_letter', 'Generate surat pengantar resmi', $internship->id);
 
         return redirect()->route('pdf.letter', $internship)
@@ -151,32 +152,66 @@ class ApprovalController extends Controller
         ]);
     }
 
-    private function generateSignature(Approval $approval)
+    private function generateSignature(Approval $approval, InternshipApplication $internship)
     {
-        $user = Auth::user();
-        
-        // Generate QR Code
-        $qrData = json_encode([
-            'approval_id' => $approval->id,
-            'application_id' => $approval->internship_application_id,
-            'approver' => $user->name,
-            'role' => $user->role,
-            'timestamp' => $approval->approved_at->toIso8601String(),
-        ]);
+        try {
+            $user = Auth::user();
+            
+            // Create QR data
+            $qrData = json_encode([
+                'approval_id' => $approval->id,
+                'application_id' => $approval->internship_application_id,
+                'approver' => $user->name,
+                'role' => $user->role,
+                'company' => $internship->company_name,
+                'student' => $internship->student->name,
+                'timestamp' => $approval->approved_at->toIso8601String(),
+                'verification_url' => route('internships.show', $internship),
+            ]);
 
-        $qrCode = QrCode::format('svg')->size(200)->generate($qrData);
-        
-        $qrPath = "signatures/qr_{$approval->id}.svg";
-        Storage::disk('public')->put($qrPath, $qrCode);
+            // Generate QR Code using simple-qrcode
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                ->size(300)
+                ->margin(1)
+                ->errorCorrection('H')
+                ->generate($qrData);
+            
+            // Save QR Code
+            $qrPath = "signatures/qr_{$approval->id}.png";
+            Storage::disk('public')->put($qrPath, $qrCode);
 
-        $approval->update([
-            'qr_code_path' => $qrPath,
-        ]);
+            // Update approval with QR path
+            $approval->update([
+                'qr_code_path' => $qrPath,
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            // Log error but don't fail the approval process
+            \Log::error('QR Code generation failed: ' . $e->getMessage());
+            
+            // Create a simple text file as fallback
+            $fallbackData = "SIMAMANG Approval Verification\n";
+            $fallbackData .= "Approval ID: {$approval->id}\n";
+            $fallbackData .= "Application ID: {$approval->internship_application_id}\n";
+            $fallbackData .= "Approver: {$user->name}\n";
+            $fallbackData .= "Role: {$user->role}\n";
+            $fallbackData .= "Timestamp: {$approval->approved_at}\n";
+            
+            $fallbackPath = "signatures/approval_{$approval->id}.txt";
+            Storage::disk('public')->put($fallbackPath, $fallbackData);
+            
+            $approval->update([
+                'qr_code_path' => $fallbackPath,
+            ]);
+            
+            return false;
+        }
     }
 
     private function generateLetterNumber(InternshipApplication $internship)
     {
-        // Format: XXX/POLSRI/YEAR/MONTH
+        // Format: XXX/POLSRI-MAGANG/YEAR/MONTH
         $year = date('Y');
         $month = date('m');
         

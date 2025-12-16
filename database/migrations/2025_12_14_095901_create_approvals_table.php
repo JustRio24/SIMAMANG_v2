@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('internship_application_id')->constrained()->onDelete('cascade');
-            $table->enum('role', ['admin_jurusan', 'sekjur', 'kajur', 'kpa', 'wadir1']);
+            $table->enum('role', ['admin_jurusan', 'kaprodi', 'kajur', 'kpa', 'wadir1']);
             $table->foreignId('approved_by')->constrained('users');
             $table->enum('action', ['approve', 'reject', 'revise'])->default('approve');
             $table->text('note')->nullable();
