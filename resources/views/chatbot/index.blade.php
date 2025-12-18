@@ -48,12 +48,12 @@
     }
     
     .message.bot .message-avatar {
-        background: linear-gradient(135deg, #1e40af, #7c3aed);
+        background: linear-gradient(135deg, #00A19C 0%, #00D4CE 100%);
         color: white;
     }
     
     .message.user .message-avatar {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: linear-gradient(270deg, #00A19C 0%, #4DC4C0 100%);
         color: white;
     }
     
@@ -72,7 +72,7 @@
     }
     
     .message.user .message-content {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: linear-gradient(180deg, #008B87, #4DC4C0);
         color: white;
         border-bottom-right-radius: 4px;
     }
@@ -97,7 +97,7 @@
     }
     
     .chat-input input:focus {
-        border-color: #3b82f6;
+        border-color: #00A19C;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
@@ -128,7 +128,7 @@
     }
     
     .quick-action:hover {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: linear-gradient(135deg, #008B87, #4DC4C0);
         color: white;
         border-color: transparent;
         transform: translateY(-2px);
@@ -157,7 +157,7 @@
     .typing-dots span {
         height: 8px;
         width: 8px;
-        background: linear-gradient(135deg, #1e40af, #7c3aed);
+        background: linear-gradient(135deg, #00A19C, #00D4CE);
         border-radius: 50%;
         animation: bounce 1.4s infinite ease-in-out both;
     }
@@ -171,7 +171,7 @@
     }
     
     .chat-header {
-        background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, #00A19C 0%, #00D4CE 100%);
         color: white;
         padding: 1.25rem 1.5rem;
         border-radius: 12px 12px 0 0;
@@ -273,7 +273,7 @@
                     @endforeach
                     
                     <div class="typing-indicator" id="typingIndicator">
-                        <div class="message-avatar" style="background: linear-gradient(135deg, #1e40af, #7c3aed); color: white; width: 42px; height: 42px;">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #00A19C, #00D4CE); color: white; width: 42px; height: 42px;">
                             <i class="bi bi-robot"></i>
                         </div>
                         <div class="typing-dots">

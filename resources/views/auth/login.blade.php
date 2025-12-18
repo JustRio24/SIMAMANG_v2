@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SIMAMANG</title>
+    <link rel="icon" type="image/png" href="{{ asset('storage/images/logo_mamang.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -136,7 +137,23 @@
 
         <button class="btn btn-sm btn-outline-success w-100"
             onclick="fillLogin('mahasiswa1@mhs.polsri.ac.id')">
-            Mahasiswa
+            Mahasiswa 1
+        </button>
+        <button class="btn btn-sm btn-outline-success w-100"
+            onclick="fillLogin('mahasiswa2@mhs.polsri.ac.id')">
+            Mahasiswa 2
+        </button>
+        <button class="btn btn-sm btn-outline-success w-100"
+            onclick="fillLogin('mahasiswa3@mhs.polsri.ac.id')">
+            Mahasiswa 3
+        </button>
+        <button class="btn btn-sm btn-outline-success w-100"
+            onclick="fillLogin('mahasiswa4@mhs.polsri.ac.id')">
+            Mahasiswa 4
+        </button>
+        <button class="btn btn-sm btn-outline-success w-100"
+            onclick="fillLogin('mahasiswa5@mhs.polsri.ac.id')">
+            Mahasiswa 5
         </button>
     </div>
 

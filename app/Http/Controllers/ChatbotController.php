@@ -7,6 +7,7 @@ use App\Models\InternshipApplication;
 use App\Models\Faq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ChatbotController extends Controller
 {
@@ -107,9 +108,36 @@ class ChatbotController extends Controller
             return "Anda belum memiliki pengajuan magang. Silakan buat pengajuan baru di menu Pengajuan Magang.";
         }
 
-        $daysAgo = $application->updated_at->diffInDays(now());
-        $timeText = $daysAgo == 0 ? 'hari ini' : ($daysAgo == 1 ? 'kemarin' : "{$daysAgo} hari yang lalu");
+        $updatedAt = $application->updated_at;
+        $now = now();
 
+        $diffInSeconds = $updatedAt->diffInSeconds($now);
+
+        if ($diffInSeconds < 60) {
+            // < 1 menit
+            $timeText = $diffInSeconds . ' detik yang lalu';
+        
+        } elseif ($diffInSeconds < 3600) {
+            // < 1 jam
+            $minutes = floor($diffInSeconds / 60);
+            $timeText = $minutes . ' menit yang lalu';
+        
+        } elseif ($diffInSeconds < 86400) {
+            // < 24 jam
+            $hours = floor($diffInSeconds / 3600);
+            $timeText = $hours . ' jam yang lalu';
+        
+        } else {
+            // ≥ 24 jam
+            $days = floor($diffInSeconds / 86400);
+        
+            if ($days === 1) {
+                $timeText = '1 hari yang lalu';
+            } else {
+                $timeText = $days . ' hari yang lalu';
+            }
+        }
+        
         $statusInfo = [
             'diajukan' => 'Pengajuan Anda sedang menunggu verifikasi dari Admin Jurusan.',
             'revisi' => 'Pengajuan Anda memerlukan revisi. Silakan periksa catatan revisi dan perbarui dokumen Anda.',

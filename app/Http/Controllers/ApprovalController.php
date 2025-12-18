@@ -157,27 +157,18 @@ class ApprovalController extends Controller
         try {
             $user = Auth::user();
             
-            // Create QR data
-            $qrData = json_encode([
-                'approval_id' => $approval->id,
-                'application_id' => $approval->internship_application_id,
-                'approver' => $user->name,
-                'role' => $user->role,
-                'company' => $internship->company_name,
-                'student' => $internship->student->name,
-                'timestamp' => $approval->approved_at->toIso8601String(),
-                'verification_url' => route('internships.show', $internship),
-            ]);
+            // Create QR data - using verification URL for easier scanning
+            $qrData = route('internships.show', $internship);
 
-            // Generate QR Code using simple-qrcode
-            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
-                ->size(300)
+            // Generate QR Code using simple-qrcode in SVG format (compatible with dompdf)
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                ->size(200)
                 ->margin(1)
                 ->errorCorrection('H')
                 ->generate($qrData);
             
-            // Save QR Code
-            $qrPath = "signatures/qr_{$approval->id}.png";
+            // Save QR Code as SVG
+            $qrPath = "signatures/qr_{$approval->id}.svg";
             Storage::disk('public')->put($qrPath, $qrCode);
 
             // Update approval with QR path
@@ -190,16 +181,14 @@ class ApprovalController extends Controller
             // Log error but don't fail the approval process
             \Log::error('QR Code generation failed: ' . $e->getMessage());
             
-            // Create a simple text file as fallback
-            $fallbackData = "SIMAMANG Approval Verification\n";
-            $fallbackData .= "Approval ID: {$approval->id}\n";
-            $fallbackData .= "Application ID: {$approval->internship_application_id}\n";
-            $fallbackData .= "Approver: {$user->name}\n";
-            $fallbackData .= "Role: {$user->role}\n";
-            $fallbackData .= "Timestamp: {$approval->approved_at}\n";
+            // Create a simple SVG fallback with text
+            $fallbackSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+                <rect width="100" height="100" fill="#f0f0f0" stroke="#ccc"/>
+                <text x="50" y="50" text-anchor="middle" font-size="10" fill="#666">QR Error</text>
+            </svg>';
             
-            $fallbackPath = "signatures/approval_{$approval->id}.txt";
-            Storage::disk('public')->put($fallbackPath, $fallbackData);
+            $fallbackPath = "signatures/qr_{$approval->id}.svg";
+            Storage::disk('public')->put($fallbackPath, $fallbackSvg);
             
             $approval->update([
                 'qr_code_path' => $fallbackPath,
@@ -207,6 +196,31 @@ class ApprovalController extends Controller
             
             return false;
         }
+    }
+
+    public function revise(Request $request, InternshipApplication $internship)
+    {
+        $user = Auth::user();
+        
+        if (!$user->isPejabat()) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+        $request->validate([
+            'note' => 'required|string',
+        ]);
+        // Store previous status before revision
+        $previousStatus = $internship->status;
+        
+        // Update status to revisi with previous status stored
+        $internship->update([
+            'status' => 'revisi',
+            'revision_note' => $request->note,
+            'previous_status' => $previousStatus,
+        ]);
+        // Create approval record for revision
+        $this->createApproval($internship, $user->role, 'revise', $request->note);
+        $this->logActivity('request_revision', "Meminta revisi pengajuan magang sebagai {$user->role}", $internship->id);
+        return back()->with('warning', 'Pengajuan dikembalikan untuk revisi.');
     }
 
     private function generateLetterNumber(InternshipApplication $internship)

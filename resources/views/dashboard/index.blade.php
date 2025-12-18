@@ -24,7 +24,7 @@
 </div>
 
 @if($weather)
-<div class="card mb-4" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); color: white;">
+<div class="card mb-4" style="background: linear-gradient(135deg, #00A19C  0%, #00D4CE  100%); color: white;">
     <div class="card-body">
         <div class="row align-items-center">
             <div class="col-md-8">

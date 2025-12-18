@@ -7,6 +7,7 @@ use App\Http\Controllers\InternshipApplicationController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\TemplateController;
 
 // Public routes
 Route::get('/', function () {
@@ -49,4 +50,14 @@ Route::middleware('auth')->group(function () {
     // Chatbot MAMANG
     Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
     Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->name('chatbot.send');
+    
+    // Templates
+    Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
+    Route::post('/templates', [TemplateController::class, 'store'])->name('templates.store');
+    Route::get('/templates/{template}/download', [TemplateController::class, 'download'])->name('templates.download');
+    Route::patch('/templates/{template}/toggle', [TemplateController::class, 'toggleStatus'])->name('templates.toggle');
+    Route::delete('/templates/{template}', [TemplateController::class, 'destroy'])->name('templates.destroy');
+    
+    // Revision by pejabat
+    Route::post('/internships/{internship}/revise', [ApprovalController::class, 'revise'])->name('internships.revise');
 });

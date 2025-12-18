@@ -14,7 +14,7 @@ class InternshipApplication extends Model
         'student_id', 'company_name', 'company_address', 'company_city',
         'company_phone', 'company_email', 'latitude', 'longitude',
         'start_date', 'end_date', 'duration_months', 'internship_description',
-        'status', 'revision_note', 'letter_number',
+        'status', 'previous_status', 'revision_note', 'letter_number',
     ];
 
     protected function casts(): array

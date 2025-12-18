@@ -212,6 +212,9 @@
                                 <i class="bi bi-check-circle"></i> Setujui
                             </button>
                         </form>
+                        <button type="button" class="btn btn-warning w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pejabatReviseModal">
+                            <i class="bi bi-arrow-clockwise"></i> Minta Revisi
+                        </button>
                         <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
                             <i class="bi bi-x-circle"></i> Tolak
                         </button>
@@ -334,6 +337,34 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger">Tolak Pengajuan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pejabat Revise -->
+<div class="modal fade" id="pejabatReviseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('internships.revise', $internship) }}" method="POST">
+                @csrf
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="bi bi-arrow-clockwise"></i> Minta Revisi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Pengajuan akan dikembalikan ke mahasiswa untuk diperbaiki. Setelah mahasiswa memperbaiki, pengajuan akan kembali ke tahap ini.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan Revisi <span class="text-danger">*</span></label>
+                        <textarea name="note" class="form-control" rows="4" required placeholder="Jelaskan apa yang perlu direvisi..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">Kirim Revisi</button>
                 </div>
             </form>
         </div>

@@ -127,6 +127,11 @@ class InternshipApplicationController extends Controller
         $end = \Carbon\Carbon::parse($validated['end_date']);
         $duration = $start->diffInMonths($end);
 
+        // Determine new status: restore previous status if in revision, otherwise set to diajukan
+        $newStatus = ($internship->status === 'revisi' && $internship->previous_status) 
+            ? $internship->previous_status 
+            : 'diajukan';
+
         $internship->update([
             'company_name' => $validated['company_name'],
             'company_address' => $validated['company_address'],
@@ -137,8 +142,9 @@ class InternshipApplicationController extends Controller
             'end_date' => $validated['end_date'],
             'duration_months' => $duration,
             'internship_description' => $validated['internship_description'],
-            'status' => 'diajukan',
+            'status' => $newStatus,
             'revision_note' => null,
+            'previous_status' => null,
         ]);
 
         // Upload new documents if provided
