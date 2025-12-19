@@ -250,6 +250,12 @@
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('news.*') ? 'active' : '' }}" href="{{ route('news.index') }}">
+                            <i class="bi bi-newspaper"></i> Berita
+                        </a>
+                    </li>
+
                     
                     @if(auth()->user()->isMahasiswa())
                         <li class="nav-item">

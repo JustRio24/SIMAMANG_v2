@@ -266,8 +266,8 @@
                             <div class="message-avatar">
                                 <i class="bi bi-robot"></i>
                             </div>
-                            <div class="message-content">
-                                {!! nl2br(e($msg->response)) !!}
+                            <div class="message-content bot-message-content" data-raw="{{ $msg->response }}">
+                                {{-- Kosongkan saja, akan diisi oleh JavaScript --}}
                             </div>
                         </div>
                     @endforeach
@@ -316,12 +316,16 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatForm = document.getElementById('chatForm');
     const messageInput = document.getElementById('messageInput');
+    const sendBtn = chatForm.querySelector('button[type="submit"]');
     const chatMessages = document.getElementById('chatMessages');
     const typingIndicator = document.getElementById('typingIndicator');
+    let isRequesting = false;
     
     document.querySelectorAll('.quick-action').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -333,12 +337,17 @@ document.addEventListener('DOMContentLoaded', function() {
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        if (isRequesting) return;
+        
         const message = messageInput.value.trim();
         if (!message) return;
         
         addMessage(message, 'user');
         messageInput.value = '';
         
+        isRequesting = true;
+        sendBtn.disabled = true;
+        messageInput.disabled = true;
         typingIndicator.classList.add('active');
         scrollToBottom();
         
@@ -359,33 +368,92 @@ document.addEventListener('DOMContentLoaded', function() {
             typingIndicator.classList.remove('active');
             
             if (data.success) {
-                addMessage(data.message.response, 'bot');
+                addMessage(data.message.response, 'bot', data.suggestedButtons || []);
             } else {
                 addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
             }
         } catch (error) {
             typingIndicator.classList.remove('active');
             addMessage('Maaf, terjadi kesalahan koneksi. Silakan coba lagi.', 'bot');
+            console.error('Chat error:', error);
+        } finally {
+            isRequesting = false;
+            sendBtn.disabled = false;
+            messageInput.disabled = false;
+            messageInput.focus();
         }
     });
+
+    function renderHistory() {
+    document.querySelectorAll('.bot-message-content').forEach(el => {
+        // Ambil teks asli dari atribut data-raw
+        const rawText = el.getAttribute('data-raw');
+        
+        if (rawText && rawText.trim() !== "") {
+            try {
+                // Proses dengan Marked.js
+                const renderedHtml = DOMPurify.sanitize(marked.parse(rawText));
+                el.innerHTML = renderedHtml;
+                el.classList.add('rendered');
+            } catch (e) {
+                console.error("Gagal render history:", e);
+                el.innerHTML = rawText.replace(/\n/g, '<br>');
+            }
+        }
+    });
+}
+
+// Panggil fungsi segera
+renderHistory();
     
-    function addMessage(text, sender) {
+    function addMessage(text, sender, suggestedButtons = []) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${sender}`;
         
-        const formattedText = text
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        let formattedText;
+        if (sender === 'bot') {
+            try {
+                // Parse markdown to HTML
+                const rawHtml = marked.parse(text);
+                // Sanitize HTML to prevent XSS
+                formattedText = DOMPurify.sanitize(rawHtml);
+            } catch (e) {
+                formattedText = text.replace(/\n/g, '<br>');
+            }
+        } else {
+            // User messages - just escape and preserve newlines
+            formattedText = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>');
+        }
+        
+        let buttonsHtml = '';
+        if (sender === 'bot' && suggestedButtons.length > 0) {
+            buttonsHtml = '<div class="suggested-buttons">' + suggestedButtons.map(btn => 
+                `<button class="btn suggested-btn" data-query="${btn.query}">${btn.text}</button>`
+            ).join('') + '</div>';
+        }
         
         messageDiv.innerHTML = `
             <div class="message-avatar">
                 <i class="bi bi-${sender === 'bot' ? 'robot' : 'person'}"></i>
             </div>
             <div class="message-content">
-                ${formattedText}
+                ${formattedText}${buttonsHtml}
             </div>
         `;
+        
+        // Attach click handlers to suggested buttons
+        if (sender === 'bot') {
+            messageDiv.querySelectorAll('.suggested-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    messageInput.value = this.dataset.query;
+                    chatForm.dispatchEvent(new Event('submit'));
+                });
+            });
+        }
         
         chatMessages.insertBefore(messageDiv, typingIndicator);
         scrollToBottom();
@@ -398,4 +466,59 @@ document.addEventListener('DOMContentLoaded', function() {
     scrollToBottom();
 });
 </script>
+<style>
+.message-content strong { font-weight: 600; color: #008B87; }
+.message-content em { font-style: italic; }
+.message.bot .message-content ul,
+.message.bot .message-content ol {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+    padding: 0;
+}
+.message.bot .message-content li {
+    margin: 0.25rem 0;
+    line-height: 1.6;
+}
+.message.bot .message-content code {
+    background: rgba(0,0,0,0.05);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+.message.bot .message-content pre {
+    background: rgba(0,0,0,0.05);
+    padding: 0.75rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+.message.bot .message-content blockquote {
+    border-left: 3px solid #00A19C;
+    padding-left: 0.75rem;
+    margin: 0.5rem 0;
+    opacity: 0.9;
+}
+.suggested-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+.suggested-btn {
+    border-radius: 16px;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #00A19C;
+    background: white;
+    color: #00A19C;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+.suggested-btn:hover {
+    background: #00A19C;
+    color: white;
+    transform: translateY(-2px);
+}
+</style>
 @endpush

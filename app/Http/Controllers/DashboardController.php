@@ -88,13 +88,30 @@ class DashboardController extends Controller
     private function getWeather()
     {
         try {
-            return [
-                'temp' => 28,
-                'condition' => 'Cerah',
-                'humidity' => 75,
-                'city' => 'Palembang',
-            ];
+            $apiKey = config('services.weatherapi.key');
+            if (!$apiKey) {
+                return null;
+            }
+
+            $response = Http::get('https://api.weatherapi.com/v1/current.json', [
+                'key' => $apiKey,
+                'q' => 'Palembang',
+                'aqi' => 'no'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return [
+                    'temp' => (int)$data['current']['temp_c'],
+                    'condition' => $data['current']['condition']['text'],
+                    'humidity' => $data['current']['humidity'],
+                    'city' => $data['location']['name'] . ', ' . $data['location']['region'],
+                ];
+            }
+
+            return null;
         } catch (\Exception $e) {
+            \Log::warning('Weather API error: ' . $e->getMessage());
             return null;
         }
     }

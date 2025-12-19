@@ -8,6 +8,7 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\NewsController;
 
 // Public routes
 Route::get('/', function () {
@@ -49,8 +50,13 @@ Route::middleware('auth')->group(function () {
     
     // Chatbot MAMANG
     Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
-    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->name('chatbot.send');
-    
+    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])
+        ->middleware('throttle:10,1') // Maksimal 10 pesan per menit
+        ->name('chatbot.send');
+
+    // News
+    Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+
     // Templates
     Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [TemplateController::class, 'store'])->name('templates.store');

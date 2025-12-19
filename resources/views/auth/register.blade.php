@@ -94,6 +94,7 @@
                         <option value="Teknik Mesin">Teknik Mesin</option>
                         <option value="Akuntansi">Akuntansi</option>
                         <option value="Administrasi Bisnis">Administrasi Bisnis</option>
+                        <option value="Administrasi Bisnis">Manajemen Informatika</option>
                     </select>
                 </div>
                 
