@@ -130,7 +130,7 @@ class ChatbotController extends Controller
         return null;
     }
 
-    private function getConversationHistory($user, $limit = 3)
+    private function getConversationHistory($user, $limit = 1)
     {
         $messages = ChatMessage::where('user_id', $user->id)
             ->latest()
