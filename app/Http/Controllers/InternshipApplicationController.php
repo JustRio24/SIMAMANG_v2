@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\InternshipApplication;
 use App\Models\Document;
+use App\Models\GeneratedDocument;
 use App\Models\ActivityLog;
+use App\Services\DocumentGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +50,7 @@ class InternshipApplicationController extends Controller
             'end_date' => 'required|date|after:start_date',
             'internship_description' => 'nullable|string',
             'proposal' => 'required|file|mimes:pdf|max:5120',
-            'surat_pengantar' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            // 'surat_pengantar' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
         // Calculate duration
@@ -77,10 +79,10 @@ class InternshipApplicationController extends Controller
             $this->uploadDocument($request->file('proposal'), $application, 'proposal');
         }
 
-        // Upload surat pengantar
-        if ($request->hasFile('surat_pengantar')) {
-            $this->uploadDocument($request->file('surat_pengantar'), $application, 'surat_pengantar');
-        }
+        // // Upload surat pengantar
+        // if ($request->hasFile('surat_pengantar')) {
+        //     $this->uploadDocument($request->file('surat_pengantar'), $application, 'surat_pengantar');
+        // }
 
         $this->logActivity('create_application', "Membuat pengajuan magang ke {$validated['company_name']}", $application->id);
 
@@ -91,10 +93,14 @@ class InternshipApplicationController extends Controller
     public function show(InternshipApplication $internship)
     {
         $this->authorize('view', $internship);
+        $generatedDocuments = GeneratedDocument::where(
+            'internship_application_id',
+            $internship->id
+        )->get();
         
         $internship->load(['student', 'documents.uploader', 'approvals.approver', 'activityLogs.user']);
         
-        return view('internships.show', compact('internship'));
+        return view('internships.show', compact('internship', 'generatedDocuments'));
     }
 
     public function edit(InternshipApplication $internship)
@@ -152,9 +158,9 @@ class InternshipApplicationController extends Controller
             $this->uploadDocument($request->file('proposal'), $internship, 'proposal');
         }
 
-        if ($request->hasFile('surat_pengantar')) {
-            $this->uploadDocument($request->file('surat_pengantar'), $internship, 'surat_pengantar');
-        }
+        // if ($request->hasFile('surat_pengantar')) {
+        //     $this->uploadDocument($request->file('surat_pengantar'), $internship, 'surat_pengantar');
+        // }
 
         $this->logActivity('update_application', 'Mengupdate pengajuan magang', $internship->id);
 
@@ -180,6 +186,69 @@ class InternshipApplicationController extends Controller
 
         return back()->with('success', 'Surat balasan berhasil diupload!');
     }
+
+    public function uploadGeneratedDocuments(
+        Request $request,
+        InternshipApplication $internship
+    ) {
+        $this->authorize('update', $internship);
+    
+        $request->validate([
+            'documents' => 'required|array',
+            'documents.*.id'   => 'required|exists:generated_documents,id',
+            'documents.*.file' => 'required|file|mimes:pdf|max:10240',
+        ]);
+    
+        $typeMap = [
+            'surat_pengantar' => 'surat_pengantar_jurusan',
+            'pengesahan'      => 'halaman_pengesahan_proposal',
+        ];
+    
+        foreach ($request->documents as $key => $doc) {
+            if (!isset($typeMap[$key])) {
+                continue;
+            }
+    
+            $this->storeGeneratedUpload(
+                $doc['file'],
+                $internship,
+                $typeMap[$key]
+            );
+        }
+    
+        $this->logActivity(
+            'upload_generated_documents',
+            'Mengunggah surat pengantar dan halaman pengesahan',
+            $internship->id
+        );
+    
+        return back()->with(
+            'success',
+            'Surat Pengantar dan Halaman Pengesahan berhasil diupload.'
+        );
+    }
+    
+    
+    
+    private function uploadGeneratedDocumentFile(
+        $file,
+        InternshipApplication $internship,
+        GeneratedDocument $document
+    ) {
+        $fileName = time() . '_' . $file->getClientOriginalName();
+    
+        $filePath = $file->storeAs(
+            "documents/{$internship->id}",
+            $fileName,
+            'public'
+        );
+    
+        $document->update([
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+        ]);
+    }
+    
 
     private function uploadDocument($file, InternshipApplication $application, $type)
     {
@@ -208,4 +277,64 @@ class InternshipApplicationController extends Controller
             'user_agent' => request()->userAgent(),
         ]);
     }
+
+    public function downloadGeneratedDocument(
+        InternshipApplication $internship,
+        GeneratedDocument $document
+    ) {
+        if (
+            $internship->student_id !== Auth::id() &&
+            !Auth::user()->isPejabat()
+        ) {
+            abort(403, 'Unauthorized');
+        }
+
+        if (!Storage::exists($document->file_path)) {
+            return back()->with('error', 'Dokumen tidak ditemukan.');
+        }
+
+        $document->update([
+            'status' => 'downloaded',
+        ]);
+
+        return Storage::download(
+            $document->file_path,
+            $document->file_name
+        );
+    }
+
+    private function storeGeneratedUpload(
+        $file,
+        InternshipApplication $internship,
+        string $documentType
+    ) {
+        $generatedDoc = GeneratedDocument::where(
+            'internship_application_id',
+            $internship->id
+        )->where('document_type', $documentType)->firstOrFail();
+    
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->storeAs(
+            "documents/{$internship->id}",
+            $fileName,
+            'public'
+        );
+    
+        $generatedDoc->update([
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+            'status'    => 'uploaded',
+        ]);
+    
+        Document::create([
+            'internship_application_id' => $internship->id,
+            'type'        => $documentType,
+            'file_name'   => $file->getClientOriginalName(),
+            'file_path'   => $filePath,
+            'file_type'   => $file->getClientMimeType(),
+            'file_size'   => $file->getSize(),
+            'uploaded_by'=> Auth::id(),
+        ]);
+    }
+    
 }

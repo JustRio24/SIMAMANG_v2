@@ -40,6 +40,11 @@ class InternshipApplication extends Model
         return $this->hasMany(Approval::class);
     }
 
+    public function generatedDocuments()
+    {
+        return $this->hasMany(GeneratedDocument::class);
+    }
+
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);

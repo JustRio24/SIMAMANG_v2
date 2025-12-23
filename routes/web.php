@@ -66,4 +66,18 @@ Route::middleware('auth')->group(function () {
     
     // Revision by pejabat
     Route::post('/internships/{internship}/revise', [ApprovalController::class, 'revise'])->name('internships.revise');
+    
+    // Generated Documents Download/Upload
+    Route::get('/internships/{internship}/document/{document}/download', [InternshipApplicationController::class, 'downloadGeneratedDocument'])
+        ->name('internships.document.download');
+        Route::post(
+            '/internships/{internship}/documents/upload',
+            [InternshipApplicationController::class, 'uploadGeneratedDocuments']
+        )->name('internships.documents.upload');
+        
+    
+
+    Route::get('/internships/{internship}/regen', [\App\Http\Controllers\ApprovalController::class, 'regen'])
+        ->name('internships.regen');
+    
 });

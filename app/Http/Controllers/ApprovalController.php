@@ -5,12 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\InternshipApplication;
 use App\Models\Approval;
 use App\Models\ActivityLog;
+use App\Models\GeneratedDocument;
+use App\Services\DocumentGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ApprovalController extends Controller
 {
+    public function regen(InternshipApplication $internship)
+    {
+        // DEV ONLY
+        if (!app()->environment('local')) {
+            abort(403);
+        }
+
+        // hapus file + db
+        Storage::deleteDirectory("generated_documents/{$internship->id}");
+        GeneratedDocument::where('internship_application_id', $internship->id)->delete();
+
+        // generate ulang
+        (new DocumentGenerationService)
+            ->generateDepartmentLetterAndEndorsement($internship);
+
+        return back()->with('success', 'Dokumen digenerate ulang');
+    }
+
     public function verify(Request $request, InternshipApplication $internship)
     {
         // Admin Jurusan verification
@@ -98,6 +118,13 @@ class ApprovalController extends Controller
         $this->generateSignature($approval, $internship);
         
         $this->logActivity('approve_application', "Menyetujui pengajuan magang sebagai {$user->role}", $internship->id);
+
+        // Generate documents automatically when all three levels approve
+        if ($user->role === 'kajur') {
+            $service = new DocumentGenerationService();
+            $service->generateDepartmentLetterAndEndorsement($internship);
+            $this->logActivity('auto_generate_documents', 'Dokumen surat pengantar jurusan dan halaman pengesahan di-generate otomatis', $internship->id);
+        }
 
         // If KPA, generate letter number
         if ($user->role === 'kpa') {

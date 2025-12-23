@@ -54,11 +54,11 @@ class DatabaseSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             User::create([
                 'name' => "Mahasiswa {$i}",
-                'nim' => "0921500{$i}",
+                'nim' => "062340833159{$i}",
                 'email' => "mahasiswa{$i}@mhs.polsri.ac.id",
                 'role' => 'mahasiswa',
-                'jurusan' => 'Teknik Sipil',
-                'prodi' => 'D4 Teknik Perancangan Jalan dan Jembatan',
+                'jurusan' => 'Manajemen Informatika',
+                'prodi' => 'D4 Manajemen Informatika',
                 'phone' => "08123456789{$i}",
                 'password' => Hash::make('password123'),
             ]);

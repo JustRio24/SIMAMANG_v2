@@ -1,5 +1,20 @@
 @extends('layouts.app')
 
+@php
+    $suratPengantar = $generatedDocuments
+        ? $generatedDocuments->firstWhere('document_type', 'surat_pengantar_jurusan')
+        : null;
+
+    $pengesahan = $generatedDocuments
+        ? $generatedDocuments->firstWhere('document_type', 'halaman_pengesahan_proposal')
+        : null;
+
+    $semuaSudahUpload =
+        ($suratPengantar && $suratPengantar->status === 'uploaded') &&
+        ($pengesahan && $pengesahan->status === 'uploaded');
+@endphp
+
+
 @section('title', 'Detail Pengajuan Magang')
 
 @section('content')
@@ -16,6 +31,27 @@
             <a href="{{ route('pdf.letter.download', $internship) }}" class="btn btn-success">
                 <i class="bi bi-download"></i> Download Surat
             </a>
+        @endif
+        @if( auth()->user()->isMahasiswa() && $internship->status === 'disetujui_akademik' && $generatedDocuments && $generatedDocuments->count() > 0 && !$semuaSudahUpload) 
+            @if($suratPengantar && $suratPengantar->status !== 'uploaded')
+                <a
+                    href="{{ route('internships.document.download', [$internship, $suratPengantar]) }}"
+                    class="btn btn-success"
+                >
+                    <i class="bi bi-download"></i>
+                    Surat Pengantar
+                </a>
+            @endif
+
+            @if($pengesahan && $pengesahan->status !== 'uploaded')
+                <a
+                    href="{{ route('internships.document.download', [$internship, $pengesahan]) }}"
+                    class="btn btn-success"
+                >
+                    <i class="bi bi-download"></i>
+                    Pengesahan Proposal
+                </a>
+            @endif
         @endif
     </div>
 </div>
@@ -127,6 +163,97 @@
                 @endif
             </div>
         </div>
+
+
+        <div class="modal fade" id="uploadDocumentsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <form
+                        action="{{ route('internships.documents.upload', $internship) }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
+                        @csrf
+        
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Upload Dokumen Tertandatangani
+                            </h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                            ></button>
+                        </div>
+        
+                        <div class="modal-body">
+                            {{-- ID Surat Pengantar --}}
+                            @if($suratPengantar)
+                                <input
+                                    type="hidden"
+                                    name="documents[surat_pengantar][id]"
+                                    value="{{ $suratPengantar->id }}"
+                                >
+        
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        File PDF Surat Pengantar Jurusan
+                                    </label>
+                                    <input
+                                        type="file"
+                                        name="documents[surat_pengantar][file]"
+                                        class="form-control"
+                                        accept="application/pdf"
+                                        required
+                                    >
+                                </div>
+                            @endif
+        
+                            {{-- ID Pengesahan --}}
+                            @if($pengesahan)
+                                <input
+                                    type="hidden"
+                                    name="documents[pengesahan][id]"
+                                    value="{{ $pengesahan->id }}"
+                                >
+        
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        File PDF Pengesahan Proposal
+                                    </label>
+                                    <input
+                                        type="file"
+                                        name="documents[pengesahan][file]"
+                                        class="form-control"
+                                        accept="application/pdf"
+                                        required
+                                    >
+                                </div>
+                            @endif
+        
+                            <small class="text-muted">
+                                Format PDF, maksimal 10MB per file
+                            </small>
+                        </div>
+        
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                            >
+                                Batal
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                Upload Dokumen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+
         
         <!-- Documents -->
         <div class="card mb-4">
@@ -137,6 +264,23 @@
                         <i class="bi bi-upload"></i> Upload Surat Balasan
                     </button>
                 @endif
+                @if(
+                    auth()->user()->isMahasiswa() &&
+                    $internship->status === 'disetujui_akademik' &&
+                    $generatedDocuments &&
+                    $generatedDocuments->count() > 0
+                )
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#uploadDocumentsModal"
+                    >
+                        <i class="bi bi-upload"></i>
+                        Upload Surat Pengantar & Pengesahan
+                    </button>
+                @endif
+
             </div>
             <div class="card-body">
                 @foreach($internship->documents as $doc)
@@ -262,6 +406,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Modal Upload Response -->
 <div class="modal fade" id="uploadResponseModal" tabindex="-1">

@@ -124,7 +124,7 @@
                 </small>
             </div>
             
-            <div class="mb-3">
+            {{-- <div class="mb-3">
                 <label class="form-label">Draft Surat Pengantar * <small class="text-muted">(PDF/DOC, max 5MB)</small></label>
                 <input type="file" name="surat_pengantar" class="form-control @error('surat_pengantar') is-invalid @enderror" 
                        accept=".pdf,.doc,.docx" required>
@@ -134,7 +134,7 @@
                 <small class="text-muted d-block mt-1">
                     <i class="bi bi-info-circle"></i> Template surat dapat diunduh di menu Template Dokumen
                 </small>
-            </div>
+            </div> --}}
         </div>
     </div>
     

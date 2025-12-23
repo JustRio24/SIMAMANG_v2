@@ -140,7 +140,7 @@
                 @enderror
             </div>
             
-            @if($internship->documents->where('type', 'surat_pengantar')->count())
+            {{-- @if($internship->documents->where('type', 'surat_pengantar')->count())
             <div class="alert alert-info mb-3">
                 <i class="bi bi-file-earmark-text"></i> Surat Pengantar saat ini: 
                 <strong>{{ $internship->documents->where('type', 'surat_pengantar')->last()->file_name }}</strong>
@@ -154,7 +154,7 @@
                 @error('surat_pengantar')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-            </div>
+            </div> --}}
         </div>
     </div>
     
