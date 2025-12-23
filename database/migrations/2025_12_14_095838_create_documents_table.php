@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('internship_application_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['proposal','surat_pengantar','surat_resmi','balasan','surat_pengantar_jurusan','halaman_pengesahan_proposal','lainnya']);
+            $table->enum('type', ['proposal','surat_pengantar','surat_resmi','balasan','surat_pengantar_jurusan','halaman_pengesahan_proposal','surat_pengantar_resmi','lainnya']);
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type')->nullable();

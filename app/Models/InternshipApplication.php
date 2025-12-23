@@ -55,10 +55,10 @@ class InternshipApplication extends Model
         $labels = [
             'diajukan' => 'Diajukan',
             'revisi' => 'Perlu Revisi',
-            'diverifikasi_jurusan' => 'Diverifikasi Jurusan',
+            'diverifikasi_jurusan' => 'Diverifikasi Admin Jurusan',
             'disetujui_kaprodi' => 'Disetujui Ketua Program Studi',
-            'disetujui_akademik' => 'Disetujui Akademik',
-            'diproses_kpa' => 'Diproses KPA',
+            'disetujui_akademik' => 'Disetujui Jurusan',
+            'diproses_kpa' => 'Diverifikasi KPA',
             'disetujui_wadir1' => 'Disetujui Wakil Direktur 1',
             'surat_terbit' => 'Surat Terbit',
             'balasan_diterima' => 'Balasan Diterima',

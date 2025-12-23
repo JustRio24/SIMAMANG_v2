@@ -173,18 +173,28 @@ class InternshipApplicationController extends Controller
         $this->authorize('update', $internship);
 
         $request->validate([
-            'response_letter' => 'required|file|mimes:pdf|max:5120',
+            'response_letter' => 'nullable|file|mimes:pdf|max:5120',
+            'official_letter' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
+        // Handle official letter upload from institution
+        if ($request->hasFile('official_letter')) {
+            $this->uploadDocument($request->file('official_letter'), $internship, 'surat_pengantar_resmi_instansi');
+            $this->logActivity('upload_official_letter', 'Mengupload surat pengantar resmi dari instansi', $internship->id);
+            return back()->with('success', 'Surat pengantar resmi berhasil diupload! Silakan upload surat balasan dari perusahaan.');
+        }
+
+        // Handle response letter upload from company
         if ($request->hasFile('response_letter')) {
             $this->uploadDocument($request->file('response_letter'), $internship, 'balasan');
             
             $internship->update(['status' => 'balasan_diterima']);
             
             $this->logActivity('upload_response', 'Mengupload surat balasan perusahaan', $internship->id);
+            return back()->with('success', 'Surat balasan berhasil diupload!');
         }
 
-        return back()->with('success', 'Surat balasan berhasil diupload!');
+        return back()->withErrors('Tidak ada file yang diunggah');
     }
 
     public function uploadGeneratedDocuments(

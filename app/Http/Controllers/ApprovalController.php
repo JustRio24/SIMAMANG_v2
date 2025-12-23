@@ -53,7 +53,9 @@ class ApprovalController extends Controller
                 'revision_note' => null,
             ]);
 
-            $this->createApproval($internship, 'admin_jurusan', 'approve', $request->note);
+            // Always record verification with note
+            $note = $request->note ?? 'Telah diverifikasi oleh Admin Jurusan';
+            $this->createApproval($internship, 'admin_jurusan', 'approve', $note);
             $this->logActivity('verify_application', 'Memverifikasi pengajuan magang', $internship->id);
 
             return back()->with('success', 'Pengajuan berhasil diverifikasi!');
@@ -103,6 +105,13 @@ class ApprovalController extends Controller
             return back()->with('error', 'Pengajuan ditolak.');
         }
 
+        // Check if required documents are uploaded when status is disetujui_akademik
+        if ($user->role === 'kpa' && $internship->status === 'disetujui_akademik') {
+            if (!$this->hasUploadedGeneratedDocuments($internship)) {
+                return back()->with('error', 'Mahasiswa harus mengupload surat pengantar jurusan dan halaman pengesahan proposal terlebih dahulu sebelum melanjutkan proses.');
+            }
+        }
+
         // Approve and move to next status
         $nextStatus = [
             'kaprodi' => 'disetujui_kaprodi',
@@ -114,7 +123,15 @@ class ApprovalController extends Controller
         $internship->update(['status' => $nextStatus[$user->role]]);
         
         // Create approval and generate signature
-        $approval = $this->createApproval($internship, $user->role, 'approve', $request->note);
+        if ($user->role === 'kajur') {
+            $note = 'Disetujui jurusan, Surat Pengantar & Pengesahan Proposal telah terbit';
+        } elseif ($user->role === 'wadir1') {
+            $note = 'Telah disetujui Wadir I, surat pengantar resmi dari instansi telah terbit';
+        } else {
+            $note = $request->note
+                ?? 'Telah disetujui oleh ' . ucfirst(str_replace('_', ' ', $user->role));
+        }
+        $approval = $this->createApproval($internship, $user->role, 'approve', $note);
         $this->generateSignature($approval, $internship);
         
         $this->logActivity('approve_application', "Menyetujui pengajuan magang sebagai {$user->role}", $internship->id);
@@ -139,6 +156,22 @@ class ApprovalController extends Controller
         return back()->with('success', 'Pengajuan berhasil disetujui!');
     }
 
+    private function hasUploadedGeneratedDocuments(InternshipApplication $internship)
+    {
+        $generatedDocuments = $internship->generatedDocuments ?? $internship->load('generatedDocuments')->generatedDocuments;
+        
+        if (!$generatedDocuments || $generatedDocuments->count() === 0) {
+            return false;
+        }
+
+        // Check if both surat pengantar and pengesahan have been uploaded
+        $suratPengantar = $generatedDocuments->firstWhere('document_type', 'surat_pengantar_jurusan');
+        $pengesahan = $generatedDocuments->firstWhere('document_type', 'halaman_pengesahan_proposal');
+
+        return ($suratPengantar && $suratPengantar->status === 'uploaded') &&
+               ($pengesahan && $pengesahan->status === 'uploaded');
+    }
+
     public function generateLetter(InternshipApplication $internship)
     {
         if (Auth::user()->role !== 'kpa') {
@@ -154,13 +187,7 @@ class ApprovalController extends Controller
             $this->generateLetterNumber($internship);
         }
 
-        // Update status
-        $internship->update(['status' => 'diproses_kpa']);
-
-        // Create approval record
-        $approval = $this->createApproval($internship, 'kpa', 'approve', 'Surat pengantar resmi telah digenerate');
-        $this->generateSignature($approval, $internship);
-        
+        // Do NOT change status - just generate the letter
         $this->logActivity('generate_letter', 'Generate surat pengantar resmi', $internship->id);
 
         return redirect()->route('pdf.letter', $internship)

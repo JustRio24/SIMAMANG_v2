@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @php
+    // Logic Preserved
     $suratPengantar = $generatedDocuments
         ? $generatedDocuments->firstWhere('document_type', 'surat_pengantar_jurusan')
         : null;
@@ -12,508 +13,632 @@
     $semuaSudahUpload =
         ($suratPengantar && $suratPengantar->status === 'uploaded') &&
         ($pengesahan && $pengesahan->status === 'uploaded');
+    
+    $suratResmiInstansi = $internship->documents
+        ? $internship->documents->firstWhere('type', 'surat_pengantar_resmi_instansi')
+        : null;
+    $suratResmiSudahUpload = $suratResmiInstansi !== null;
 @endphp
-
 
 @section('title', 'Detail Pengajuan Magang')
 
+@push('styles')
+<style>
+    :root {
+        --primary-teal: #00A19C;
+        --soft-teal: #e6fffa;
+        --text-dark: #2d3748;
+        --text-gray: #718096;
+    }
+
+    /* Layout & Cards */
+    .page-header {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        margin-bottom: 2rem;
+        border-left: 5px solid var(--primary-teal);
+    }
+
+    .custom-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        border: none;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .card-header-clean {
+        background: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #edf2f7;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* Timeline Styling */
+    .timeline-wrapper {
+        position: relative;
+        padding-left: 1rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        padding-bottom: 1.5rem;
+        border-left: 2px solid #e2e8f0;
+    }
+    .timeline-item:last-child {
+        border-left: 2px solid transparent;
+        padding-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid var(--primary-teal);
+    }
+    .timeline-marker.danger { border-color: #e53e3e; }
+    .timeline-marker.success { border-color: #38a169; background: #38a169; }
+
+    /* Stat/Info Boxes */
+    .info-box {
+        background-color: #f8fafc;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        height: 100%;
+        border: 1px solid #edf2f7;
+    }
+    
+    /* File Item */
+    .file-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s;
+        background: white;
+    }
+    .file-item:hover {
+        border-color: var(--primary-teal);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff5f5;
+        color: #e53e3e;
+        border-radius: 8px;
+        font-size: 1.25rem;
+        margin-right: 1rem;
+    }
+
+    /* Labels */
+    .info-label {
+        font-size: 0.8rem;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+    .info-value {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">Detail Pengajuan Magang</h1>
-        <p class="text-muted mb-0">ID Pengajuan: <strong>#{{ $internship->id }}</strong></p>
-    </div>
-    <div>
-        <a href="{{ route('internships.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-        @if($internship->letter_number && $internship->status === 'surat_terbit')
-            <a href="{{ route('pdf.letter.download', $internship) }}" class="btn btn-success">
-                <i class="bi bi-download"></i> Download Surat
-            </a>
-        @endif
-        @if( auth()->user()->isMahasiswa() && $internship->status === 'disetujui_akademik' && $generatedDocuments && $generatedDocuments->count() > 0 && !$semuaSudahUpload) 
-            @if($suratPengantar && $suratPengantar->status !== 'uploaded')
-                <a
-                    href="{{ route('internships.document.download', [$internship, $suratPengantar]) }}"
-                    class="btn btn-success"
-                >
-                    <i class="bi bi-download"></i>
-                    Surat Pengantar
-                </a>
-            @endif
 
-            @if($pengesahan && $pengesahan->status !== 'uploaded')
-                <a
-                    href="{{ route('internships.document.download', [$internship, $pengesahan]) }}"
-                    class="btn btn-success"
-                >
-                    <i class="bi bi-download"></i>
-                    Pengesahan Proposal
-                </a>
-            @endif
-        @endif
-    </div>
-</div>
+<div class="row">
+    <div class="col-12">
+        <div class="page-header d-md-flex justify-content-between align-items-center">
+            <div>
+                <div class="d-flex align-items-center mb-1">
+                    <a href="{{ route('internships.index') }}" class="text-muted me-2 text-decoration-none">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="h4 fw-bold mb-0 text-dark">Detail Pengajuan #{{ $internship->id }}</h1>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="badge rounded-pill bg-{{ $internship->status_color }} px-3 py-2">
+                        {{ $internship->status_label }}
+                    </span>
+                    <span class="text-muted small">Updated {{ $internship->updated_at->diffForHumans() }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-3 mt-md-0 d-flex gap-2">
+                @if($internship->letter_number && $internship->status === 'surat_terbit' && !$suratResmiSudahUpload)
+                    <a href="{{ route('pdf.letter.download', $internship) }}" class="btn btn-success shadow-sm">
+                        <i class="bi bi-file-earmark-check me-1"></i> Download Surat Resmi
+                    </a>
+                @endif
 
-<!-- Status Banner -->
-<div class="alert alert-{{ $internship->status_color }} d-flex align-items-center mb-4">
-    <i class="bi bi-{{ $internship->status === 'selesai' ? 'check-circle' : 'info-circle' }} fs-4 me-3"></i>
-    <div>
-        <h5 class="mb-1">Status: {{ $internship->status_label }}</h5>
-        <p class="mb-0 small">Diupdate {{ $internship->updated_at->diffForHumans() }}</p>
+                @if(auth()->user()->isMahasiswa() && $internship->status === 'disetujui_akademik' && $generatedDocuments && $generatedDocuments->count() > 0 && !$semuaSudahUpload)
+                    <div class="btn-group shadow-sm">
+                        @if($suratPengantar && $suratPengantar->status !== 'uploaded')
+                            <a href="{{ route('internships.document.download', [$internship, $suratPengantar]) }}" class="btn btn-outline-success bg-white">
+                                <i class="bi bi-download me-1"></i> Surat Pengantar
+                            </a>
+                        @endif
+                        @if($pengesahan && $pengesahan->status !== 'uploaded')
+                            <a href="{{ route('internships.document.download', [$internship, $pengesahan]) }}" class="btn btn-outline-success bg-white">
+                                <i class="bi bi-download me-1"></i> Pengesahan
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
 </div>
 
 @if($internship->status === 'revisi' && $internship->revision_note)
-<div class="alert alert-warning">
-    <h6><i class="bi bi-exclamation-triangle"></i> Catatan Revisi:</h6>
-    <p class="mb-0">{{ $internship->revision_note }}</p>
-    @if(auth()->user()->isMahasiswa())
-        <a href="{{ route('internships.edit', $internship) }}" class="btn btn-warning btn-sm mt-2">
-            <i class="bi bi-pencil"></i> Perbarui Pengajuan
-        </a>
-    @endif
+<div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4 d-flex">
+    <div class="fs-1 me-3 text-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div>
+        <h6 class="fw-bold mb-1">Perlu Revisi</h6>
+        <p class="mb-2">{{ $internship->revision_note }}</p>
+        @if(auth()->user()->isMahasiswa())
+            <a href="{{ route('internships.edit', $internship) }}" class="btn btn-warning btn-sm text-white fw-bold">
+                <i class="bi bi-pencil-square me-1"></i> Perbarui Data
+            </a>
+        @endif
+    </div>
+</div>
+@endif
+
+@if($internship->status === 'disetujui_akademik' && auth()->user()->isMahasiswa() && !$semuaSudahUpload)
+<div class="alert alert-info border-0 shadow-sm rounded-3 mb-4 d-flex bg-soft-teal" style="background-color: #e1f5fe; color: #0277bd;">
+    <div class="fs-1 me-3"><i class="bi bi-info-circle-fill"></i></div>
+    <div class="w-100">
+        <h6 class="fw-bold mb-2">Langkah Selanjutnya</h6>
+        <ol class="ps-3 mb-0 small">
+            <li>Download <strong>Surat Pengantar</strong> & <strong>Pengesahan</strong> dari tombol di kanan atas.</li>
+            <li>Tanda tangani dokumen tersebut.</li>
+            <li>Upload kembali melalui tombol <strong>"Upload Dokumen Tertandatangani"</strong> di bagian Dokumen di bawah.</li>
+        </ol>
+    </div>
 </div>
 @endif
 
 <div class="row">
-    <!-- Left Column -->
     <div class="col-lg-8">
-        <!-- Company Info -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-building"></i> Informasi Perusahaan</h5>
+        
+        <div class="custom-card">
+            <div class="card-header-clean">
+                <span><i class="bi bi-building me-2 text-primary"></i>Informasi Perusahaan & Periode</span>
             </div>
-            <div class="card-body">
-                <table class="table table-borderless">
-                    <tr>
-                        <th width="200">Nama Perusahaan:</th>
-                        <td><strong>{{ $internship->company_name }}</strong></td>
-                    </tr>
-                    <tr>
-                        <th>Alamat:</th>
-                        <td>{{ $internship->company_address }}</td>
-                    </tr>
-                    <tr>
-                        <th>Kota:</th>
-                        <td>{{ $internship->company_city }}</td>
-                    </tr>
-                    @if($internship->company_phone)
-                    <tr>
-                        <th>Telepon:</th>
-                        <td>{{ $internship->company_phone }}</td>
-                    </tr>
-                    @endif
-                    @if($internship->company_email)
-                    <tr>
-                        <th>Email:</th>
-                        <td>{{ $internship->company_email }}</td>
-                    </tr>
-                    @endif
-                </table>
-                
-                @if($internship->latitude && $internship->longitude)
-                <div class="mt-3">
-                    <h6>Lokasi di Peta:</h6>
-                    <div class="ratio ratio-16x9">
-                        <iframe src="https://maps.google.com/maps?q={{ $internship->latitude }},{{ $internship->longitude }}&hl=id&z=14&output=embed" 
-                                frameborder="0" style="border:0; border-radius: 8px;"></iframe>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-12 mb-3">
+                        <span class="info-label">Nama Perusahaan</span>
+                        <div class="fs-5 fw-bold text-dark">{{ $internship->company_name }}</div>
+                        <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ $internship->company_city }}</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <span class="info-label">Alamat Lengkap</span>
+                        <div class="info-value">{{ $internship->company_address }}</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <span class="info-label">Kontak</span>
+                                <div class="info-value">
+                                    @if($internship->company_phone) <i class="bi bi-telephone me-1 text-muted"></i> {{ $internship->company_phone }} @endif
+                                </div>
+                                <div class="info-value">
+                                    @if($internship->company_email) <i class="bi bi-envelope me-1 text-muted"></i> {{ $internship->company_email }} @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                @endif
-            </div>
-        </div>
-        
-        <!-- Internship Period -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Periode Magang</h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
+
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <i class="bi bi-calendar-check text-success fs-3"></i>
-                            <p class="mb-1 mt-2 text-muted small">Tanggal Mulai</p>
-                            <h5 class="mb-0">{{ $internship->start_date->format('d M Y') }}</h5>
+                        <div class="info-box">
+                            <i class="bi bi-calendar-check fs-4 text-success mb-2 d-block"></i>
+                            <span class="info-label">Mulai</span>
+                            <div class="info-value">{{ $internship->start_date->format('d M Y') }}</div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <i class="bi bi-hourglass-split text-primary fs-3"></i>
-                            <p class="mb-1 mt-2 text-muted small">Durasi</p>
-                            <h5 class="mb-0">{{ $internship->duration_months }} Bulan</h5>
+                        <div class="info-box">
+                            <i class="bi bi-hourglass-split fs-4 text-primary mb-2 d-block"></i>
+                            <span class="info-label">Durasi</span>
+                            <div class="info-value">{{ $internship->duration_months }} Bulan</div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="border rounded p-3">
-                            <i class="bi bi-calendar-x text-danger fs-3"></i>
-                            <p class="mb-1 mt-2 text-muted small">Tanggal Selesai</p>
-                            <h5 class="mb-0">{{ $internship->end_date->format('d M Y') }}</h5>
+                        <div class="info-box">
+                            <i class="bi bi-calendar-x fs-4 text-danger mb-2 d-block"></i>
+                            <span class="info-label">Selesai</span>
+                            <div class="info-value">{{ $internship->end_date->format('d M Y') }}</div>
                         </div>
                     </div>
                 </div>
                 
                 @if($internship->internship_description)
-                <div class="mt-3">
-                    <h6>Deskripsi Magang:</h6>
-                    <p class="text-muted">{{ $internship->internship_description }}</p>
+                <div class="mt-4 p-3 bg-light rounded-3">
+                    <span class="info-label mb-2">Rencana Kegiatan / Deskripsi</span>
+                    <p class="mb-0 text-muted small">{{ $internship->internship_description }}</p>
                 </div>
                 @endif
-            </div>
-        </div>
-
-
-        <div class="modal fade" id="uploadDocumentsModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <form
-                        action="{{ route('internships.documents.upload', $internship) }}"
-                        method="POST"
-                        enctype="multipart/form-data"
-                    >
-                        @csrf
-        
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                Upload Dokumen Tertandatangani
-                            </h5>
-                            <button
-                                type="button"
-                                class="btn-close"
-                                data-bs-dismiss="modal"
-                            ></button>
-                        </div>
-        
-                        <div class="modal-body">
-                            {{-- ID Surat Pengantar --}}
-                            @if($suratPengantar)
-                                <input
-                                    type="hidden"
-                                    name="documents[surat_pengantar][id]"
-                                    value="{{ $suratPengantar->id }}"
-                                >
-        
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        File PDF Surat Pengantar Jurusan
-                                    </label>
-                                    <input
-                                        type="file"
-                                        name="documents[surat_pengantar][file]"
-                                        class="form-control"
-                                        accept="application/pdf"
-                                        required
-                                    >
-                                </div>
-                            @endif
-        
-                            {{-- ID Pengesahan --}}
-                            @if($pengesahan)
-                                <input
-                                    type="hidden"
-                                    name="documents[pengesahan][id]"
-                                    value="{{ $pengesahan->id }}"
-                                >
-        
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        File PDF Pengesahan Proposal
-                                    </label>
-                                    <input
-                                        type="file"
-                                        name="documents[pengesahan][file]"
-                                        class="form-control"
-                                        accept="application/pdf"
-                                        required
-                                    >
-                                </div>
-                            @endif
-        
-                            <small class="text-muted">
-                                Format PDF, maksimal 10MB per file
-                            </small>
-                        </div>
-        
-                        <div class="modal-footer">
-                            <button
-                                type="button"
-                                class="btn btn-secondary"
-                                data-bs-dismiss="modal"
-                            >
-                                Batal
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                Upload Dokumen
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-
-        
-        <!-- Documents -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-files"></i> Dokumen</h5>
-                @if(auth()->user()->isMahasiswa() && $internship->status === 'surat_terbit')
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadResponseModal">
-                        <i class="bi bi-upload"></i> Upload Surat Balasan
-                    </button>
-                @endif
-                @if(
-                    auth()->user()->isMahasiswa() &&
-                    $internship->status === 'disetujui_akademik' &&
-                    $generatedDocuments &&
-                    $generatedDocuments->count() > 0
-                )
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#uploadDocumentsModal"
-                    >
-                        <i class="bi bi-upload"></i>
-                        Upload Surat Pengantar & Pengesahan
-                    </button>
-                @endif
-
-            </div>
-            <div class="card-body">
-                @foreach($internship->documents as $doc)
-                <div class="d-flex align-items-center justify-content-between border rounded p-3 mb-2">
-                    <div>
-                        <h6 class="mb-1">
-                            <i class="bi bi-file-earmark-pdf text-danger"></i>
-                            {{ $doc->file_name }}
-                        </h6>
-                        <small class="text-muted">
-                            Jenis: {{ ucfirst($doc->type) }} • 
-                            Diupload {{ $doc->created_at->diffForHumans() }} • 
-                            {{ number_format($doc->file_size / 1024, 2) }} KB
-                        </small>
+                
+                @if($internship->latitude && $internship->longitude)
+                <div class="mt-4">
+                    <div class="ratio ratio-21x9 rounded-3 overflow-hidden border">
+                         <iframe src="https://maps.google.com/maps?q={{ $internship->latitude }},{{ $internship->longitude }}&hl=id&z=14&output=embed" style="border:0;"></iframe>
                     </div>
-                    <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-download"></i> Download
-                    </a>
                 </div>
-                @endforeach
+                @endif
+            </div>
+        </div>
+
+        <div class="custom-card">
+            <div class="card-header-clean">
+                <span><i class="bi bi-folder2-open me-2 text-warning"></i>Berkas Dokumen</span>
+                <div>
+                    {{-- Logic Tombol Upload Mahasiswa --}}
+                    @if(auth()->user()->isMahasiswa())
+                        @if($internship->status === 'disetujui_akademik' && $generatedDocuments && $generatedDocuments->count() > 0 && !$semuaSudahUpload)
+                             <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#uploadDocumentsModal">
+                                <i class="bi bi-upload me-1"></i> Upload Ttd
+                            </button>
+                        @endif
+
+                        @if($internship->status === 'surat_terbit')
+                            @if(!$suratResmiSudahUpload)
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#uploadOfficialLetterModal">
+                                    <i class="bi bi-upload me-1"></i> Upload Surat Instansi
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#uploadResponseModal">
+                                    <i class="bi bi-upload me-1"></i> Upload Balasan
+                                </button>
+                            @endif
+                        @endif
+                    @endif
+                </div>
+            </div>
+            <div class="card-body p-4">
+                @if($internship->documents->isEmpty())
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-file-earmark-x fs-1 opacity-25"></i>
+                        <p class="mt-2 small">Belum ada dokumen yang diunggah.</p>
+                    </div>
+                @else
+                    @foreach($internship->documents as $doc)
+                    <div class="file-item">
+                        <div class="file-icon">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark">{{ $doc->file_name }}</div>
+                            <div class="text-muted small text-uppercase" style="font-size: 0.7rem;">
+                                {{ str_replace('_', ' ', $doc->type) }} • {{ number_format($doc->file_size / 1024, 0) }} KB
+                            </div>
+                            <div class="text-muted small" style="font-size: 0.7rem;">
+                                <i class="bi bi-clock"></i> {{ $doc->created_at->diffForHumans() }}
+                            </div>
+                        </div>
+                        <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-light text-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    </div>
+                    @endforeach
+                @endif
             </div>
         </div>
     </div>
-    
-    <!-- Right Column -->
+
     <div class="col-lg-4">
-        <!-- Student Info -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-person"></i> Data Mahasiswa</h5>
+        
+        <div class="custom-card text-center p-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px; font-size: 1.5rem; font-weight: bold; color: var(--primary-teal);">
+                {{ substr($internship->student->name, 0, 2) }}
             </div>
-            <div class="card-body">
-                <p class="mb-1"><strong>{{ $internship->student->name }}</strong></p>
-                <p class="mb-1 text-muted small">NIM: {{ $internship->student->nim }}</p>
-                <p class="mb-1 text-muted small">Jurusan: {{ $internship->student->jurusan }}</p>
-                <p class="mb-0 text-muted small">Prodi: {{ $internship->student->prodi }}</p>
+            <h5 class="fw-bold text-dark mb-1">{{ $internship->student->name }}</h5>
+            <p class="text-muted mb-3">{{ $internship->student->nim }}</p>
+            <hr class="my-3">
+            <div class="text-start">
+                <small class="text-muted d-block mb-1">Jurusan</small>
+                <div class="fw-bold text-dark mb-2">{{ $internship->student->jurusan }}</div>
+                <small class="text-muted d-block mb-1">Program Studi</small>
+                <div class="fw-bold text-dark">{{ $internship->student->prodi }}</div>
             </div>
         </div>
-        
-        <!-- Approval Actions -->
+
         @if(!auth()->user()->isMahasiswa())
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-check2-square"></i> Tindakan</h5>
+        <div class="custom-card">
+            <div class="card-header-clean bg-light">
+                <span><i class="bi bi-sliders me-2"></i>Aksi Persetujuan</span>
             </div>
-            <div class="card-body">
-                @if(auth()->user()->role === 'admin_jurusan' && $internship->status === 'diajukan')
-                    <form action="{{ route('internships.verify', $internship) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="action" value="verify">
-                        <button type="submit" class="btn btn-success w-100 mb-2">
-                            <i class="bi bi-check-circle"></i> Verifikasi
-                        </button>
-                    </form>
-                    <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#reviseModal">
-                        <i class="bi bi-arrow-clockwise"></i> Minta Revisi
-                    </button>
-                @elseif(auth()->user()->isPejabat())
-                    @php
-                        $canApprove = [
-                            'kaprodi' => 'diverifikasi_jurusan',
-                            'kajur' => 'disetujui_kaprodi',
-                            'kpa' => 'disetujui_akademik',
-                            'wadir1' => 'diproses_kpa',
-                        ];
-                    @endphp
-                    
-                    @if(isset($canApprove[auth()->user()->role]) && $internship->status === $canApprove[auth()->user()->role])
-                        <form action="{{ route('internships.approve', $internship) }}" method="POST">
+            <div class="card-body p-3">
+                <div class="d-grid gap-2">
+                    {{-- Admin Jurusan Verify --}}
+                    @if(auth()->user()->role === 'admin_jurusan' && $internship->status === 'diajukan')
+                        <form action="{{ route('internships.verify', $internship) }}" method="POST">
                             @csrf
-                            <input type="hidden" name="action" value="approve">
-                            <button type="submit" class="btn btn-success w-100 mb-2">
-                                <i class="bi bi-check-circle"></i> Setujui
-                            </button>
+                            <input type="hidden" name="action" value="verify">
+                            <button class="btn btn-success w-100 fw-bold py-2"><i class="bi bi-check-lg me-1"></i> Verifikasi</button>
                         </form>
-                        <button type="button" class="btn btn-warning w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pejabatReviseModal">
-                            <i class="bi bi-arrow-clockwise"></i> Minta Revisi
+                        <button class="btn btn-warning w-100 fw-bold py-2 text-white" data-bs-toggle="modal" data-bs-target="#reviseModal">
+                            <i class="bi bi-pencil me-1"></i> Minta Revisi
                         </button>
-                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                            <i class="bi bi-x-circle"></i> Tolak
-                        </button>
-                    @endif
                     
-                    @if(auth()->user()->role === 'kpa' && $internship->status === 'disetujui_akademik')
-                        <form action="{{ route('internships.generate-letter', $internship) }}" method="POST" class="mt-2">
-                            @csrf
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-file-text"></i> Generate Surat
-                            </button>
-                        </form>
+                    {{-- Officials Approve --}}
+                    @elseif(auth()->user()->isPejabat())
+                         @php
+                            $canApprove = [
+                                'kaprodi' => 'diverifikasi_jurusan',
+                                'kajur' => 'disetujui_kaprodi',
+                                'kpa' => 'disetujui_akademik',
+                                'wadir1' => 'diproses_kpa',
+                            ];
+                        @endphp
+
+                        @if(isset($canApprove[auth()->user()->role]) && $internship->status === $canApprove[auth()->user()->role])
+                            <form action="{{ route('internships.approve', $internship) }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="action" value="approve">
+                                <button class="btn btn-success w-100 fw-bold py-2 mb-2"><i class="bi bi-check-lg me-1"></i> Setujui Pengajuan</button>
+                            </form>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <button class="btn btn-warning w-100 text-white" data-bs-toggle="modal" data-bs-target="#pejabatReviseModal">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Revisi
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                        <i class="bi bi-x-lg"></i> Tolak
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(auth()->user()->role === 'kpa' && $internship->status === 'disetujui_akademik')
+                            <form action="{{ route('internships.generate-letter', $internship) }}" method="POST" target="_blank" class="mt-2">
+                                @csrf
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-printer me-1"></i> Generate Surat
+                                </button>
+                            </form>
+                        @endif
+                    @else
+                        <div class="text-center text-muted small py-2">
+                            Tidak ada aksi yang diperlukan saat ini.
+                        </div>
                     @endif
-                @endif
+                </div>
             </div>
         </div>
         @endif
-        
-        <!-- Approval Timeline -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-list-check"></i> Timeline Persetujuan</h5>
+
+        <div class="custom-card">
+            <div class="card-header-clean">
+                <span><i class="bi bi-clock-history me-2"></i>Riwayat Status</span>
             </div>
-            <div class="card-body">
-                <div class="timeline">
+            <div class="card-body p-4">
+                <div class="timeline-wrapper">
                     @foreach($internship->approvals as $approval)
                     <div class="timeline-item">
-                        <div>
-                            <strong class="text-{{ $approval->action === 'approve' ? 'success' : 'danger' }}">
-                                <i class="bi bi-{{ $approval->action === 'approve' ? 'check-circle' : 'x-circle' }}"></i>
-                                {{ ucfirst($approval->role) }}
-                            </strong>
-                            <p class="mb-1 small">{{ $approval->approver->name }}</p>
-                            @if($approval->note)
-                                <p class="text-muted small mb-1">{{ $approval->note }}</p>
-                            @endif
-                            <small class="text-muted">
-                                {{ $approval->approved_at->format('d M Y H:i') }}
-                            </small>
+                        <div class="timeline-marker {{ $approval->action === 'reject' ? 'danger' : ($approval->action === 'approve' ? 'success' : '') }}"></div>
+                        <div class="fw-bold text-dark" style="font-size: 0.9rem;">
+                            {{ ucfirst($approval->role) }}
+                        </div>
+                        <div class="small text-muted mb-1">
+                            {{ $approval->approver->name }}
+                        </div>
+                        <div class="badge bg-light text-dark border mb-1">
+                            {{ ucfirst($approval->action) }}
+                        </div>
+                        @if($approval->note)
+                            <div class="bg-light p-2 rounded small text-muted fst-italic mt-1">
+                                "{{ $approval->note }}"
+                            </div>
+                        @endif
+                        <div class="text-muted mt-1" style="font-size: 0.7rem;">
+                            {{ $approval->approved_at->format('d M Y, H:i') }}
                         </div>
                     </div>
                     @endforeach
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="fw-bold text-dark" style="font-size: 0.9rem;">Dibuat</div>
+                        <div class="small text-muted">{{ $internship->created_at->format('d M Y, H:i') }}</div>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
-
-
-<!-- Modal Upload Response -->
-<div class="modal fade" id="uploadResponseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('internships.upload-response', $internship) }}" method="POST" enctype="multipart/form-data">
+<div class="modal fade" id="uploadDocumentsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form action="{{ route('internships.documents.upload', $internship) }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Upload Surat Balasan Perusahaan</h5>
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold">Upload Dokumen Tertandatangani</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">File Surat Balasan (PDF)</label>
-                        <input type="file" name="response_letter" class="form-control" accept=".pdf" required>
+                    <div class="alert alert-info small mb-3">
+                        Pastikan dokumen sudah ditandatangani sebelum diupload. Format PDF maks 10MB.
                     </div>
+                    
+                    @if($suratPengantar)
+                        <input type="hidden" name="documents[surat_pengantar][id]" value="{{ $suratPengantar->id }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Surat Pengantar Jurusan</label>
+                            <input type="file" name="documents[surat_pengantar][file]" class="form-control" accept="application/pdf" required>
+                        </div>
+                    @endif
+
+                    @if($pengesahan)
+                        <input type="hidden" name="documents[pengesahan][id]" value="{{ $pengesahan->id }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Pengesahan Proposal</label>
+                            <input type="file" name="documents[pengesahan][file]" class="form-control" accept="application/pdf" required>
+                        </div>
+                    @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Upload</button>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Revise -->
+<div class="modal fade" id="uploadOfficialLetterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form action="{{ route('internships.upload-response', $internship) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Upload Surat Pengantar Resmi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Silakan upload surat pengantar resmi dari instansi yang diterbitkan oleh Wadir 1.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">File PDF</label>
+                        <input type="file" name="official_letter" class="form-control" accept=".pdf" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadResponseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form action="{{ route('internships.upload-response', $internship) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Upload Balasan Perusahaan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Silakan upload surat balasan penerimaan dari perusahaan.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">File PDF</label>
+                        <input type="file" name="response_letter" class="form-control" accept=".pdf" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="reviseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
             <form action="{{ route('internships.verify', $internship) }}" method="POST">
                 @csrf
                 <input type="hidden" name="action" value="revise">
-                <div class="modal-header">
-                    <h5 class="modal-title">Minta Revisi</h5>
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold text-warning"><i class="bi bi-exclamation-circle me-2"></i>Minta Revisi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Catatan Revisi</label>
-                        <textarea name="note" class="form-control" rows="4" required placeholder="Jelaskan apa yang perlu direvisi..."></textarea>
+                        <textarea name="note" class="form-control bg-light" rows="4" required placeholder="Jelaskan bagian mana yang perlu diperbaiki mahasiswa..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning">Kirim Revisi</button>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning text-white rounded-pill px-4">Kirim Revisi</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Reject -->
 <div class="modal fade" id="rejectModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
             <form action="{{ route('internships.approve', $internship) }}" method="POST">
                 @csrf
                 <input type="hidden" name="action" value="reject">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Tolak Pengajuan</h5>
+                <div class="modal-header border-bottom-0 bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-x-circle me-2"></i>Tolak Pengajuan</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle"></i> Tindakan ini akan menolak pengajuan magang.
-                    </div>
+                    <p class="text-danger fw-medium mt-3">Apakah Anda yakin ingin menolak pengajuan ini?</p>
                     <div class="mb-3">
                         <label class="form-label">Alasan Penolakan</label>
-                        <textarea name="note" class="form-control" rows="4" required placeholder="Jelaskan alasan penolakan..."></textarea>
+                        <textarea name="note" class="form-control" rows="3" required placeholder="Berikan alasan penolakan..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger">Tolak Pengajuan</button>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Tolak</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Pejabat Revise -->
 <div class="modal fade" id="pejabatReviseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
             <form action="{{ route('internships.revise', $internship) }}" method="POST">
                 @csrf
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title"><i class="bi bi-arrow-clockwise"></i> Minta Revisi</h5>
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold text-warning"><i class="bi bi-arrow-counterclockwise me-2"></i>Kembalikan (Revisi)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Pengajuan akan dikembalikan ke mahasiswa untuk diperbaiki. Setelah mahasiswa memperbaiki, pengajuan akan kembali ke tahap ini.
+                    <div class="alert alert-light border small text-muted">
+                        Pengajuan akan dikembalikan ke mahasiswa.
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Catatan Revisi <span class="text-danger">*</span></label>
-                        <textarea name="note" class="form-control" rows="4" required placeholder="Jelaskan apa yang perlu direvisi..."></textarea>
+                        <label class="form-label fw-semibold">Catatan <span class="text-danger">*</span></label>
+                        <textarea name="note" class="form-control" rows="4" required placeholder="Instruksi perbaikan..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning">Kirim Revisi</button>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning text-white rounded-pill px-4">Kirim Revisi</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 @endsection

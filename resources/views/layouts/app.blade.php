@@ -6,248 +6,230 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SIMAMANG') - Sistem Manajemen Magang POLSRI</title>
     <link rel="icon" type="image/png" href="{{ asset('storage/images/logo_mamang.png') }}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
         :root {
             --primary-color: #00A19C;
-            --primary-dark: #008B87;
-            --primary-light: #4DC4C0;
-            --secondary-color: #00D4CE;
-            --success-color: #00A19C;
-            --danger-color: #dc2626;
-            --warning-color: #d97706;
+            --primary-dark: #007a76;
+            --primary-light: #e6f6f5; /* Warna background untuk item aktif */
+            --text-dark: #2c3e50;
+            --text-muted: #95a5a6;
+            --bg-body: #f8f9fa;
+            --navbar-height: 80px;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
-            padding-top: 76px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            padding-top: var(--navbar-height); /* Space for fixed navbar */
+            color: var(--text-dark);
         }
         
+        /* NAVBAR STYLING */
         .navbar-custom {
-            background: linear-gradient(360deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            min-height: 76px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            height: var(--navbar-height);
+            border-bottom: 3px solid var(--primary-color); /* Identity Line */
         }
         
         .navbar-brand img {
-            height: 50px;
+            height: 45px;
             width: auto;
+            transition: transform 0.3s;
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.05);
+        }
+
+        .brand-text {
+            line-height: 1.2;
         }
         
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9) !important;
+        /* Navigation Links */
+        .nav-link {
+            color: #555 !important;
             font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            margin: 0 0.25rem;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .navbar-custom .nav-link:hover,
-        .navbar-custom .nav-link.active {
-            background-color: rgba(255,255,255,0.15);
-            color: white !important;
-        }
-        
-        .navbar-custom .dropdown-menu {
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 12px;
-            margin-top: 0.5rem;
-        }
-        
-        .user-info {
-            color: white;
+            padding: 0.6rem 1.2rem !important;
+            margin: 0 0.2rem;
+            border-radius: 50px; /* Pill shape */
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+            gap: 8px;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            background-color: rgba(0, 161, 156, 0.05);
+        }
+        
+        /* Active State Design */
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-dark) !important;
+            font-weight: 600;
+        }
+
+        .nav-link.active i {
+            color: var(--primary-color);
+        }
+        
+        /* User Dropdown */
+        .user-info-btn {
+            background: transparent;
+            border: 1px solid #eee;
+            padding: 5px 15px 5px 5px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .user-info-btn:hover {
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-color: var(--primary-light);
         }
         
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 600;
+            font-size: 1rem;
         }
         
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            margin-top: 15px;
+            padding: 1rem;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        /* MAIN CONTENT */
         .main-content {
             padding: 2rem 0;
-            min-height: calc(100vh - 76px);
+            min-height: calc(100vh - var(--navbar-height));
         }
-        
-        .card {
+
+        /* ALERTS CUSTOMIZATION */
+        .alert {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
         }
         
-        .card-header {
-            background-color: white;
-            border-bottom: 2px solid #f1f5f9;
-            padding: 1.25rem;
-            font-weight: 600;
-            border-radius: 12px 12px 0 0 !important;
-        }
-        
-        .badge-status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,161,156,0.3);
-        }
-        
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-        
-        .timeline-item {
-            position: relative;
-            padding-bottom: 2rem;
-        }
-        
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2rem;
-            top: 0;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-        }
-        
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: -1.7rem;
-            top: 12px;
-            width: 2px;
-            height: calc(100% - 12px);
-            background-color: #e2e8f0;
-        }
-        
-        .timeline-item:last-child::after {
-            display: none;
-        }
-        
+        .alert-success { background-color: #d1e7dd; color: #0f5132; }
+        .alert-danger { background-color: #f8d7da; color: #842029; }
+        .alert-warning { background-color: #fff3cd; color: #664d03; }
+
+        /* FLOATING CHATBOT */
         .chatbot-float {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,161,156,0.4);
-            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(0, 161, 156, 0.4);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1000;
         }
         
         .chatbot-float:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0,161,156,0.5);
+            transform: scale(1.1) rotate(10deg);
         }
-        
-        .clock-widget {
-            background: rgba(255,255,255,0.15);
-            padding: 0.75rem 1.25rem;
-            border-radius: 10px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
+
+        /* Pulse Animation for Chatbot */
+        .chatbot-float::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
         }
-        
-        .text-primary {
-            color: var(--primary-color) !important;
-        }
-        
-        .bg-primary {
-            background-color: var(--primary-color) !important;
-        }
-        
-        .border-primary {
-            border-color: var(--primary-color) !important;
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            70% { transform: scale(1.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
         }
         
         @media (max-width: 991px) {
             .navbar-collapse {
-                background: rgba(255,255,255,0.1);
+                background: white;
                 padding: 1rem;
-                border-radius: 12px;
-                margin-top: 1rem;
+                border-radius: 0 0 15px 15px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+                border-top: 1px solid #eee;
             }
+            .nav-link { margin-bottom: 5px; }
+            .user-info-btn { border: none; padding-left: 0; }
         }
     </style>
     
     @stack('styles')
 </head>
 <body>
-    <!-- Navbar -->
+    
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">
-                <img style="; transform-origin: center; margin-left: -5px;" src="{{ asset('storage/images/logo_mamang.png') }}" alt="SIMAMANG Logo">
-            </a> 
-            <div class="d-flex flex-column left-0">
-                <p class="navbar-text text-white fw-bold mb-0">SIMAMANG</p>
-                <p class="navbar-text text-white mb-0" style="font-size: 0.9rem; opacity: 0.9; margin-top: -18px;">
-                    Sistem Manajemen Magang POLSRI
-                </p>
-            </div>
+        <div class="container px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
+                <img src="{{ asset('storage/images/logo_mamang.png') }}" alt="Logo" onerror="this.src='https://placehold.co/50x50?text=SM'">
+                <div class="d-flex flex-column brand-text">
+                    <span class="fw-bold" style="color: var(--primary-color); font-size: 1.2rem;">SIMAMANG</span>
+                    <span class="text-muted" style="font-size: 0.75rem; letter-spacing: 0.5px;">Sistem Manajemen Magang</span>
+                </div>
+            </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border-color: rgba(255,255,255,0.3);">
-                <i class="bi bi-list text-white" style="font-size: 1.5rem;"></i>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
+                            <i class="bi bi-grid"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
@@ -256,66 +238,67 @@
                         </a>
                     </li>
 
-                    
                     @if(auth()->user()->isMahasiswa())
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('internships.*') ? 'active' : '' }}" href="{{ route('internships.index') }}">
-                                <i class="bi bi-file-earmark-text"></i> Pengajuan
+                                <i class="bi bi-send"></i> Pengajuan
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('templates.*') ? 'active' : '' }}" href="{{ route('templates.index') }}">
-                                <i class="bi bi-file-earmark-arrow-down"></i> Template
+                                <i class="bi bi-file-earmark-text"></i> Template
                             </a>
                         </li>
                     @else
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('internships.*') ? 'active' : '' }}" href="{{ route('internships.index') }}">
-                                <i class="bi bi-folder"></i> Daftar Pengajuan
+                                <i class="bi bi-inbox"></i> Data Pengajuan
                             </a>
                         </li>
                         @if(auth()->user()->role === 'admin_jurusan')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('templates.*') ? 'active' : '' }}" href="{{ route('templates.index') }}">
-                                <i class="bi bi-files"></i> Kelola Template
+                                <i class="bi bi-gear"></i> Kelola Template
                             </a>
                         </li>
                         @endif
                     @endif
                 </ul>
                 
-                <div class="d-flex align-items-center gap-3">
-                    {{-- <!-- Real-time Clock -->
-                    <div class="clock-widget">
-                        <i class="bi bi-clock"></i>
-                        <span id="realTimeClock">--:--:--</span>
-                        <small id="realTimeDate" style="opacity: 0.9;">--/--/----</small>
-                    </div>
-                     --}}
-                    <!-- User Info -->
+                <div class="d-flex align-items-end gap-3">
                     <div class="dropdown">
-                        <button class="btn user-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="user-info-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
-                            {{-- <div class="text-start d-none d-lg-block">
-                                <div style="font-size: 0.95rem;">{{ auth()->user()->name }}</div>
-                                <small style="opacity: 0.8;">{{ strtoupper(str_replace('_', ' ', auth()->user()->role)) }}</small>
+                            {{-- <div class="d-none d-lg-block text-start me-2">
+                                <div class="fw-bold text-dark" style="font-size: 0.9rem; line-height: 1;">{{ Str::limit(auth()->user()->name, 15) }}</div>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ ucwords(str_replace('_', ' ', auth()->user()->role)) }}</small>
                             </div> --}}
+                            <i class="bi bi-chevron-down text-muted" style="font-size: 0.8rem;"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <span class="dropdown-item-text">
-                                    <strong>{{ auth()->user()->name }}</strong><br>
-                                    <small class="text-muted">{{ auth()->user()->email }}</small>
-                                </span>
+
+                        <ul class="dropdown-menu dropdown-menu-end animate slideIn">
+                            <li class="px-3 py-2 border-bottom mb-2">
+                                <span class="d-block fw-bold">{{ auth()->user()->name }}</span>
+                                <small class="text-muted">{{ auth()->user()->email }}</small>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            {{-- <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-person me-2"></i> Profil Saya
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-gear me-2"></i> Pengaturan
+                                </a>
+                            </li> --}}
+                            {{-- <li><hr class="dropdown-divider"></li> --}}
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                        <i class="bi bi-box-arrow-right me-2"></i> Keluar
                                     </button>
                                 </form>
                             </li>
@@ -326,26 +309,28 @@
         </div>
     </nav>
     
-    <!-- Main Content -->
     <div class="main-content">
-        <div class="container-fluid px-4">
+        <div class="container px-4">
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>{{ session('success') }}</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
             
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                    <div>{{ session('error') }}</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
             
             @if(session('warning'))
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle me-2"></i>{{ session('warning') }}
+                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    <div>{{ session('warning') }}</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
@@ -354,40 +339,11 @@
         </div>
     </div>
     
-    <!-- Chatbot Float Button -->
-    <a href="{{ route('chatbot.index') }}" class="chatbot-float" title="Chat dengan MAMANG">
-        <i class="bi bi-robot"></i>
+    <a href="{{ route('chatbot.index') }}" class="chatbot-float" title="Bantuan MAMANG">
+        <i class="bi bi-robot" style=" transform: scale(0.8);"></i>
     </a>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Real-time Clock
-        function updateClock() {
-            const now = new Date();
-            
-            // Format time (WIB)
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const timeString = `${hours}:${minutes}:${seconds} WIB`;
-            
-            // Format date
-            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-            const dayName = days[now.getDay()];
-            const date = now.getDate();
-            const month = months[now.getMonth()];
-            const year = now.getFullYear();
-            const dateString = `${dayName}, ${date} ${month} ${year}`;
-            
-            document.getElementById('realTimeClock').textContent = timeString;
-            document.getElementById('realTimeDate').textContent = dateString;
-        }
-        
-        // Update clock immediately and then every second
-        updateClock();
-        setInterval(updateClock, 1000);
-    </script>
     @stack('scripts')
 </body>
 </html>
