@@ -298,6 +298,15 @@
                 <button class="btn btn-sm btn-outline-primary w-100 ql-btn mb-1" onclick="fillLogin('mahasiswa2@mhs.polsri.ac.id')">
                     Mahasiswa 2 <i class="bi bi-person"></i>
                 </button>
+                <button class="btn btn-sm btn-outline-primary w-100 ql-btn mb-1" onclick="fillLogin('mahasiswa3@mhs.polsri.ac.id')">
+                    Mahasiswa 3 <i class="bi bi-person"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 ql-btn mb-1" onclick="fillLogin('mahasiswa4@mhs.polsri.ac.id')">
+                    Mahasiswa 4 <i class="bi bi-person"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary w-100 ql-btn mb-1" onclick="fillLogin('mahasiswa5@mhs.polsri.ac.id')">
+                    Mahasiswa 5 <i class="bi bi-person"></i>
+                </button>
             </div>
         </div>
     </div>

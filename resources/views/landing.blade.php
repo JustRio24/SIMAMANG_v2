@@ -562,7 +562,7 @@
             <div class="section-title" data-aos="fade-up">
                 <span>Fitur Unggulan</span>
                 <h2>Ekosistem Magang Cerdas</h2>
-                <p>Kami merancang fitur yang menjawab kebutuhan mahasiswa, dosen, dan administrasi.</p>
+                <p>Fitur yang menjawab kebutuhan mahasiswa, dosen, dan administrasi.</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
@@ -580,7 +580,7 @@
                             <i class="bi bi-diagram-3"></i>
                         </div>
                         <h3>Smart Workflow</h3>
-                        <p class="text-muted">Alur persetujuan otomatis dari Kaprodi hingga Kajur. Status dokumen terpantau real-time tanpa perlu bertanya manual.</p>
+                        <p class="text-muted">Alur persetujuan otomatis dari Admin Jurusan hingga Wakil Direktur 1. Status dokumen terpantau real-time tanpa perlu bertanya manual.</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
@@ -613,10 +613,10 @@
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
                     <div class="feature-card">
                         <div class="feature-icon-wrapper">
-                            <i class="bi bi-bell"></i>
+                            <i class="bi bi-clock"></i>
                         </div>
-                        <h3>Instant Notification</h3>
-                        <p class="text-muted">Terima notifikasi via WhatsApp/Email setiap kali ada update status pada pengajuan Anda. Tidak ada lagi info terlewat.</p>
+                        <h3>Easy Access 24/7</h3>
+                        <p class="text-muted">Login kapan saja untuk melihat status terbaru pengajuan Anda tanpa harus datang ke kantor atau menunggu jam kerja.</p>
                     </div>
                 </div>
             </div>
@@ -750,7 +750,7 @@
                     Masuk ke Dashboard
                 </a>
             @else
-                <a href="{{ route('register') }}" class="btn btn-light btn-lg rounded-pill px-5 text-primary fw-bold me-2 mb-2">
+                <a href="{{ route('register') }}" class="btn btn-light btn-lg rounded-pill px-5 text-cyan-300 fw-bold me-2 mb-2">
                     Daftar Sekarang
                 </a>
                 <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold mb-2">
