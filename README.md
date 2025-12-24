@@ -945,7 +945,7 @@ Untuk penggunaan di luar POLSRI, silakan hubungi:
 ## 👨‍💻 Tim Pengembang
 
 ### Project Lead
-- **[Your Name]** - Lead Developer
+- **RIO** - Lead Developer
   - Email: justrio24@gmail.com
   - GitHub: JustRio24(https://github.com/JustRio24)
   - Fullstack Developer & UI/UX Designer
