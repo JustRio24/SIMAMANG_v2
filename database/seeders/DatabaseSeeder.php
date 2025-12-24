@@ -13,10 +13,10 @@ class DatabaseSeeder extends Seeder
     {
         // Create Admin Users (Pejabat)
         User::create([
-            'name' => 'Admin Jurusan Teknik Sipil',
+            'name' => 'Admin Jurusan Manajemen Informatika',
             'email' => 'admin.ts@polsri.ac.id',
             'role' => 'admin_jurusan',
-            'jurusan' => 'Teknik Sipil',
+            'jurusan' => 'Manajemen Informatika',
             'password' => Hash::make('password123'),
         ]);
 
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Dr. Ahmad Ketua Program Studi',
             'email' => 'kaprodi@polsri.ac.id',
             'role' => 'kaprodi',
-            'jurusan' => 'Teknik Sipil',
+            'jurusan' => 'Manajemen Informatika',
             'password' => Hash::make('password123'),
         ]);
 
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Prof. Budi Ketua Jurusan',
             'email' => 'kajur@polsri.ac.id',
             'role' => 'kajur',
-            'jurusan' => 'Teknik Sipil',
+            'jurusan' => 'Manajemen Informatika',
             'password' => Hash::make('password123'),
         ]);
 

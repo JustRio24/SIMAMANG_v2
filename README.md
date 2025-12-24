@@ -1,6 +1,6 @@
 # SIMAMANG - Sistem Manajemen Magang POLSRI
 
-![SIMAMANG Logo](public/images/logo-simamang.png)
+![SIMAMANG Logo](public//logo.png)
 
 > **Sistem Informasi Berbasis Web untuk Mendigitalisasi Proses Pengajuan, Validasi, Persetujuan, dan Dokumentasi Magang Mahasiswa**
 
