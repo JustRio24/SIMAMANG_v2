@@ -194,7 +194,7 @@ Mahasiswa → Admin Jurusan → Kaprodi → Kajur → KPA → Wadir 1 → Surat 
 
 ```bash
 # 1. Clone Repository
-git clone https://github.com/your-username/simamang.git
+git clone tps://github.com/JustRio24/SIMAMANG_v2
 cd simamang
 
 # 2. Install Dependencies
@@ -946,17 +946,13 @@ Untuk penggunaan di luar POLSRI, silakan hubungi:
 
 ### Project Lead
 - **[Your Name]** - Lead Developer
-  - Email: your.email@example.com
-  - GitHub: [@yourusername](https://github.com/yourusername)
-
-### Contributors
-- **[Contributor 1]** - Backend Developer
-- **[Contributor 2]** - Frontend Developer
-- **[Contributor 3]** - UI/UX Designer
+  - Email: justrio24@gmail.com
+  - GitHub: JustRio24(https://github.com/JustRio24)
+  - Fullstack Developer & UI/UX Designer
 
 ### Special Thanks
 - **Politeknik Negeri Sriwijaya** - Support & Resources
-- **Jurusan Teknik Sipil** - Testing & Feedback
+- **Jurusan Manajemen Informatika** - Testing & Feedback
 - **Laravel Community** - Framework & Documentation
 
 ---
@@ -969,7 +965,7 @@ Untuk penggunaan di luar POLSRI, silakan hubungi:
 
 ### Bug Report
 Laporkan bug melalui:
-- GitHub Issues: [Create Issue](https://github.com/your-repo/simamang/issues)
+- GitHub Issues: [Create Issue](https://github.com/justrio24/simamang_v2/issues)
 - Email: bugs@simamang.polsri.ac.id
 
 ### Feature Request
