@@ -937,9 +937,7 @@ Sistem ini dikembangkan untuk keperluan akademik dan internal POLSRI.
 **Copyright © 2025 Politeknik Negeri Sriwijaya**
 
 Untuk penggunaan di luar POLSRI, silakan hubungi:
-- **Email:** info@polsri.ac.id
-- **Website:** https://polsri.ac.id
-
+- **Email:** justrio24@gmail.com
 ---
 
 ## 👨‍💻 Tim Pengembang
